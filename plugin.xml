@@ -1,0 +1,16 @@
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-webxr" version="0.0.1">
+    <name>WebXR</name>
+    <description>WebXR Plugin</description>
+    <author>Thomas Zachariah</author>
+    <license>Apache 2.0</license>
+    <keywords>webxr, immersive web, mozilla, w3c, polyfill, xr, augmented reality, ar, virtual reality, vr, arkit</keywords>
+    <platform name="ios">
+        <preference name="CAMERA_USAGE_DESCRIPTION" default="This app uses the camera for augmented reality"/>
+        <config-file target="*-Info.plist" parent="NSCameraUsageDescription">
+            <string>$CAMERA_USAGE_DESCRIPTION</string>
+        </config-file>
+    </platform>
+    <js-module src="webxr-polyfill.js" name="webxr">
+        <clobbers target="navigator.XR" />
+    </js-module>
+</plugin>

@@ -1,0 +1,35 @@
+{
+  "name": "cordova-plugin-webxr",
+  "version": "0.0.1",
+  "description": "WebXR Plugin",
+  "cordova": {
+    "id": "cordova-plugin-webxr",
+    "platforms": [
+      "ios"
+    ]
+  },
+  "keywords": [
+    "ar", 
+    "vr", 
+    "xr", 
+    "w3c", 
+    "arkit", 
+    "webxr", 
+    "mozilla", 
+    "polyfill", 
+    "immersive web", 
+    "virtual reality", 
+    "augmented reality", 
+    "ecosystem:cordova",
+    "cordova-android",
+    "cordova-ios"
+  ],
+  "engines": [
+    {
+      "name": "cordova",
+      "version": ">=6.0.0"
+    }
+  ],
+  "author": "Thomas Zachariah",
+  "license": "Apache 2.0"
+}
