@@ -6,9 +6,52 @@
     <keywords>webxr, immersive web, mozilla, w3c, polyfill, xr, augmented reality, ar, virtual reality, vr, arkit</keywords>
     <platform name="ios">
         <preference name="CAMERA_USAGE_DESCRIPTION" default="This app uses the camera for augmented reality"/>
+
         <config-file target="*-Info.plist" parent="NSCameraUsageDescription">
             <string>$CAMERA_USAGE_DESCRIPTION</string>
         </config-file>
+
+        <header-file src="Resources/XRViewer-Bridging-Header.h" target-dir="Resources" />
+        <header-file src="Resources/XRViewer-Swift.h" target-dir="Resources" />
+
+        <!-- <source-file src="Utilities/Constants.swift" target-dir="Utilities" /> -->
+
+        <header-file src="ARKController/ARKHelper.h" target-dir="ARKController" /> 
+        <header-file src="ARKController/ARKController.h" target-dir="ARKController" />
+        <source-file src="ARKController/ARKController.m" target-dir="ARKController" />
+
+        <!-- <source-file src="ARKController/ARKController+Anchors.swift" target-dir="ARKController" /> -->
+        <!-- <source-file src="ARKController/ARKController+AppState.swift" target-dir="ARKController" /> -->
+        <!-- <source-file src="ARKController/ARKController+ARSessionDelegate.swift" target-dir="ARKController" /> -->
+        <!-- <source-file src="ARKController/ARKController+ARSessionObserver.swift" target-dir="ARKController" /> -->
+        <!-- <source-file src="ARKController/ARKController+Camera.swift" target-dir="ARKController" /> -->
+        <!-- <source-file src="ARKController/ARKController+Frame.swift" target-dir="ARKController" /> -->
+        <!-- <source-file src="ARKController/ARKController+Images.swift" target-dir="ARKController" /> -->
+        <!-- <source-file src="ARKController/ARKController+WorldMap.swift" target-dir="ARKController" /> -->
+        <!-- <source-file src="ARKController/ARKControllerProtocol.swift" target-dir="ARKController" /> -->
+        
+        <source-file src="ARKController/Metal/ARKMetalController.swift" target-dir="ARKController/Metal" />
+        <!-- <source-file src="ARKController/Metal/Render/Renderer.swift" target-dir="ARKController/Metal/Render" /> -->
+        <!-- <source-file src="ARKController/Metal/Render/ShaderTypes.swift" target-dir="ARKController/Metal/Render" /> -->
+        <!-- <resource-file src="ARKController/Metal/Render/Shaders.metal" target-dir="ARKController/Metal/Render" /> -->
+
+        <source-file src="ARKController/SceneKit/ARKSceneKitController.swift" target-dir="ARKController/SceneKit" />
+
+        <source-file src="Utilities/Utils.swift" target-dir="Utilities" />
+
+        <source-file src="webxrPlugin.swift" />
+
+        <!-- <framework src="Accelerate.framework" /> -->
+        <dependency id="cordova-plugin-add-swift-support" version="2.0.2"/>
+
+        <info>
+            This plugin requires an iOS Deployment Target of 12.0 or higher. 
+            Make sure to adjust config.xml accordingly, e.g:
+
+            &lt;platform name="ios"&gt;
+                &lt;preference name="deployment-target" value="12.0.0" /&gt;
+            &lt;/platform&gt;
+        </info>
     </platform>
     <js-module src="webxr-polyfill.js" name="webxr">
         <clobbers target="navigator.XR" />
