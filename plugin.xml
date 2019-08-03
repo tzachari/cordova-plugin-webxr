@@ -1,4 +1,4 @@
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-webxr" version="0.0.1">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-webxr" version="1.17.0">
     <name>WebXR</name>
     <description>WebXR Plugin</description>
     <author>Thomas Zachariah</author>
@@ -7,42 +7,60 @@
     <platform name="ios">
         <preference name="CAMERA_USAGE_DESCRIPTION" default="This app uses the camera for augmented reality"/>
 
+        <config-file target="config.xml" parent="/widget">
+            <feature name="WebXRPlugin">
+                <param name="ios-package" value="WebXRPlugin" onload="true"/>
+            </feature>
+        </config-file>
+
         <config-file target="*-Info.plist" parent="NSCameraUsageDescription">
             <string>$CAMERA_USAGE_DESCRIPTION</string>
         </config-file>
 
-        <header-file src="Resources/XRViewer-Bridging-Header.h" target-dir="Resources" />
-        <header-file src="Resources/XRViewer-Swift.h" target-dir="Resources" />
-
-        <!-- <source-file src="Utilities/Constants.swift" target-dir="Utilities" /> -->
-
         <header-file src="ARKController/ARKHelper.h" target-dir="ARKController" /> 
         <header-file src="ARKController/ARKController.h" target-dir="ARKController" />
         <source-file src="ARKController/ARKController.m" target-dir="ARKController" />
-
-        <!-- <source-file src="ARKController/ARKController+Anchors.swift" target-dir="ARKController" /> -->
-        <!-- <source-file src="ARKController/ARKController+AppState.swift" target-dir="ARKController" /> -->
-        <!-- <source-file src="ARKController/ARKController+ARSessionDelegate.swift" target-dir="ARKController" /> -->
-        <!-- <source-file src="ARKController/ARKController+ARSessionObserver.swift" target-dir="ARKController" /> -->
-        <!-- <source-file src="ARKController/ARKController+Camera.swift" target-dir="ARKController" /> -->
-        <!-- <source-file src="ARKController/ARKController+Frame.swift" target-dir="ARKController" /> -->
-        <!-- <source-file src="ARKController/ARKController+Images.swift" target-dir="ARKController" /> -->
-        <!-- <source-file src="ARKController/ARKController+WorldMap.swift" target-dir="ARKController" /> -->
-        <!-- <source-file src="ARKController/ARKControllerProtocol.swift" target-dir="ARKController" /> -->
+        <source-file src="ARKController/ARKController+Anchors.swift" target-dir="ARKController" />
+        <source-file src="ARKController/ARKController+AppState.swift" target-dir="ARKController" />
+        <source-file src="ARKController/ARKController+ARSessionDelegate.swift" target-dir="ARKController" />
+        <source-file src="ARKController/ARKController+ARSessionObserver.swift" target-dir="ARKController" />
+        <source-file src="ARKController/ARKController+Camera.swift" target-dir="ARKController" />
+        <source-file src="ARKController/ARKController+Frame.swift" target-dir="ARKController" />
+        <source-file src="ARKController/ARKController+Images.swift" target-dir="ARKController" />
+        <source-file src="ARKController/ARKController+WorldMap.swift" target-dir="ARKController" />
+        <source-file src="ARKController/ARKControllerProtocol.swift" target-dir="ARKController" />
+        <source-file src="ARKController/HitTestResult.swift" target-dir="ARKController" />
         
         <source-file src="ARKController/Metal/ARKMetalController.swift" target-dir="ARKController/Metal" />
-        <!-- <source-file src="ARKController/Metal/Render/Renderer.swift" target-dir="ARKController/Metal/Render" /> -->
-        <!-- <source-file src="ARKController/Metal/Render/ShaderTypes.swift" target-dir="ARKController/Metal/Render" /> -->
-        <!-- <resource-file src="ARKController/Metal/Render/Shaders.metal" target-dir="ARKController/Metal/Render" /> -->
+        <source-file src="ARKController/Metal/Render/Renderer.swift" target-dir="ARKController/Metal/Render" />
+        <source-file src="ARKController/Metal/Render/ShaderTypes.swift" target-dir="ARKController/Metal/Render" />
+        <source-file src="ARKController/Metal/Render/Shaders.metal" target-dir="ARKController/Metal/Render" />
 
         <source-file src="ARKController/SceneKit/ARKSceneKitController.swift" target-dir="ARKController/SceneKit" />
+        <source-file src="ARKController/SceneKit/ARSCNView+HitTest.swift" target-dir="ARKController/SceneKit" />
+        <source-file src="ARKController/SceneKit/SCNNode+Show.swift" target-dir="ARKController/SceneKit" />
+        <source-file src="ARKController/SceneKit/AnchorNode.swift" target-dir="ARKController/SceneKit" />
+        <source-file src="ARKController/SceneKit/FocusNode.swift" target-dir="ARKController/SceneKit" />
+        <source-file src="ARKController/SceneKit/PlaneNode.swift" target-dir="ARKController/SceneKit" />
 
+        <source-file src="AppStateController/AppStateController.swift" target-dir="AppStateController" />
+        <source-file src="AppStateController/AppState.swift" target-dir="AppStateController" />
+
+        <header-file src="Resources/XRViewer-Bridging-Header.h" target-dir="Resources" />
+        <source-file src="Resources/Prefix.swift" target-dir="Resources" />
+
+        <source-file src="Utilities/Constants.swift" target-dir="Utilities" />
         <source-file src="Utilities/Utils.swift" target-dir="Utilities" />
 
-        <source-file src="webxrPlugin.swift" />
+        <source-file src="WebController/WebController.swift" target-dir="WebController" />
 
-        <!-- <framework src="Accelerate.framework" /> -->
+        <header-file src="XRViewer-Swift.h" />
+        <source-file src="WebXRPlugin.swift" />
+
         <dependency id="cordova-plugin-add-swift-support" version="2.0.2"/>
+        <dependency id="cordova-plugin-wkwebview-engine" version="1.2.1"/>
+
+        <hook type="before_plugin_install" src="prepare.js" />
 
         <info>
             This plugin requires an iOS Deployment Target of 12.0 or higher. 

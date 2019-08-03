@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-webxr",
-  "version": "0.0.1",
+  "version": "1.17.0",
   "description": "WebXR Plugin",
   "cordova": {
     "id": "cordova-plugin-webxr",

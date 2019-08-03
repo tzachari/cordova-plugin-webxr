@@ -2,7 +2,12 @@
 #import <AVFoundation/AVFoundation.h>
 #import <Accelerate/Accelerate.h>
 #import "Compression.h"
-#import "XRViewer-Swift.h"
+//#import "XRViewer-Swift.h"
+
+#import "arish-Swift.h"
+#define DDLogFormat(...) [NSString stringWithFormat:__VA_ARGS__]
+#define DDLogDebug(...) NSLog(@"WEBXR PLUGIN DEBUG : %@",DDLogFormat(__VA_ARGS__))
+#define DDLogError(...) NSLog(@"WEBXR PLUGIN ERROR : %@",DDLogFormat(__VA_ARGS__))
 
 @interface ARKController () {
 }

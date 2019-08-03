@@ -1,6 +1,6 @@
 import Foundation
 import WebKit
-import CocoaLumberjack
+
 
 typealias ResultBlock = ([AnyHashable : Any]?) -> Void
 typealias ResultArrayBlock = ([Any]?) -> Void
@@ -42,32 +42,25 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
     @objc var onCreateDetectionImage: (([AnyHashable : Any], @escaping CreateDetectionImageCompletionBlock) -> Void)?
     @objc var onGetWorldMap: ((@escaping GetWorldMapCompletionBlock) -> Void)?
     @objc var onSetWorldMap: (([AnyHashable : Any], @escaping SetWorldMapCompletionBlock) -> Void)?
-    @objc var animator: Animator?
-    @objc weak var barViewHeightAnchorConstraint: NSLayoutConstraint?
     @objc weak var webViewTopAnchorConstraint: NSLayoutConstraint?
     @objc var webViewLeftAnchorConstraint: NSLayoutConstraint?
     @objc var webViewRightAnchorConstraint: NSLayoutConstraint?
     @objc var lastXRVisitedURL = ""
 
-    @objc func hideCameraFlipButton() {
-        barView?.hideCameraFlipButton()
-    }
-    private weak var rootView: UIView?
     @objc weak var webView: WKWebView?
     private weak var contentController: WKUserContentController?
     private var transferCallback = ""
     @objc var lastURL = ""
-    weak var barView: BarView?
-    private weak var barViewTopAnchorConstraint: NSLayoutConstraint?
     private var documentReadyState = ""
     
-    @objc init(rootView: UIView?) {
+    @objc init(withWebView wv: WKWebView) {
         super.init()
         
-        setupWebView(withRootView: rootView)
+        self.webView = wv
+        
+        setupWebView()
         setupWebContent()
         setupWebUI()
-        setupBarView()
     }
     
     deinit {
@@ -85,7 +78,7 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
         goFullScreen()
 
         var url: URL?
-        if theUrl?.hasPrefix("http://") ?? false || theUrl?.hasPrefix("https://") ?? false {
+        if theUrl?.hasPrefix("http://") ?? false || theUrl?.hasPrefix("https://") ?? false || theUrl?.hasPrefix("file://") ?? false {
             url = URL(string: theUrl ?? "")
         } else {
             url = URL(string: "https://\(theUrl ?? "")")
@@ -114,12 +107,8 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
         onError?(nil)
     }
 
-    @objc func prefillLastURL() {
-        barView?.urlField.text = UserDefaults.standard.string(forKey: LAST_URL_KEY)
-    }
-
     @objc func reload() {
-        let url = (barView?.urlFieldText()?.count ?? 0) > 0 ? barView?.urlFieldText() : lastURL
+        let url = lastURL
         loadURL(url)
     }
 
@@ -134,9 +123,6 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
 
     @objc func setup(forWebXR webXR: Bool) {
         DispatchQueue.main.async(execute: {
-            self.barView?.hideKeyboard()
-            self.barView?.setDebugVisible(webXR)
-            self.barView?.setRestartTrackingVisible(webXR)
             let webViewTopAnchorConstraintConstant: Float = webXR ? 0.0 : Float(Constant.urlBarHeight())
             self.webViewTopAnchorConstraint?.constant = CGFloat(webViewTopAnchorConstraintConstant)
             self.webView?.superview?.setNeedsLayout()
@@ -144,20 +130,6 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
 
             let backColor = webXR ? UIColor.clear : UIColor.white
             self.webView?.superview?.backgroundColor = backColor
-
-            self.animator?.animate(self.webView?.superview, to: backColor)
-        })
-    }
-
-    @objc func showBar(_ showBar: Bool) {
-        print("Show bar: \(showBar ? "Yes" : "No")")
-        barView?.superview?.layoutIfNeeded()
-
-        let topAnchorConstant: Float = showBar ? 0.0 : Float(0.0 - Constant.urlBarHeight() * 2)
-        barViewTopAnchorConstraint?.constant = CGFloat(topAnchorConstant)
-
-        UIView.animate(withDuration: Constant.urlBarAnimationTimeInSeconds(), animations: {
-            self.barView?.superview?.layoutIfNeeded()
         })
     }
 
@@ -197,10 +169,6 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
         }
     }
 
-    @objc func hideKeyboard() {
-        barView?.hideKeyboard()
-    }
-
     @objc func didReceiveError(error: NSError) {
         let errorDictionary = [WEB_AR_IOS_ERROR_DOMAIN_PARAMETER: error.domain, WEB_AR_IOS_ERROR_CODE_PARAMETER: error.code, WEB_AR_IOS_ERROR_MESSAGE_PARAMETER: error.localizedDescription] as [String : Any]
         callWebMethod(WEB_AR_IOS_ERROR_MESSAGE, paramJSON: errorDictionary, webCompletion: debugCompletion(name: WEB_AR_IOS_ERROR_MESSAGE))
@@ -214,10 +182,6 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
         })
     }
 
-    @objc func isDebugButtonSelected() -> Bool {
-        return barView?.isDebugButtonSelected() ?? false
-    }
-
     @objc func sendNativeTime(_ nativeTime: TimeInterval) {
         print("Sending native time: \(nativeTime)")
         let jsonData = ["nativeTime": nativeTime]
@@ -229,38 +193,6 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
     }
 
     @objc func userGrantedWebXRAuthorizationState(_ access: WebXRAuthorizationState) {
-        barView?.permissionLevelButton?.isEnabled = true
-        switch access {
-        case .videoCameraAccess:
-            let image = UIImage(named: "camera")
-            let tintedImage = image?.withRenderingMode(.alwaysTemplate)
-            barView?.permissionLevelButton?.setImage(tintedImage, for: .normal)
-            barView?.permissionLevelButton?.tintColor = .red
-        case .worldSensing:
-            let image = UIImage(named: "globe")
-            let tintedImage = image?.withRenderingMode(.alwaysTemplate)
-            barView?.permissionLevelButton?.setImage(tintedImage, for: .normal)
-            barView?.permissionLevelButton?.tintColor = .red
-        case .lite:
-            let image = UIImage(named: "view_off")
-            let tintedImage = image?.withRenderingMode(.alwaysTemplate)
-            barView?.permissionLevelButton?.setImage(tintedImage, for: .normal)
-            barView?.permissionLevelButton?.tintColor = .red
-        case .minimal:
-            let image = UIImage(named: "circle_ok")
-            let tintedImage = image?.withRenderingMode(.alwaysTemplate)
-            barView?.permissionLevelButton?.setImage(tintedImage, for: .normal)
-            barView?.permissionLevelButton?.tintColor = .green
-        case .denied:
-            let image = UIImage(named: "block")
-            let tintedImage = image?.withRenderingMode(.alwaysTemplate)
-            barView?.permissionLevelButton?.setImage(tintedImage, for: .normal)
-            barView?.permissionLevelButton?.tintColor = .green
-        case .notDetermined:
-            barView?.permissionLevelButton?.setImage(nil, for: .normal)
-            barView?.permissionLevelButton?.isEnabled = false
-        }
-        
         // This may change, in one of two ways:
         // - should probably switch this to one method that updates all aspects of the state we want
         // the page to know
@@ -301,7 +233,7 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
                 WEB_IOS_IS_IPAD_OPTION: UIDevice.current.userInterfaceIdiom == .pad,
                 WEB_IOS_SYSTEM_VERSION_OPTION: UIDevice.current.systemVersion,
                 WEB_IOS_SCREEN_SCALE_OPTION: UIScreen.main.nativeScale,
-                WEB_IOS_SCREEN_SIZE_OPTION: NSCoder.string(for: UIScreen.main.nativeBounds.size)
+                WEB_IOS_SCREEN_SIZE_OPTION: NSStringFromCGSize(UIScreen.main.nativeBounds.size)
             ] as [String : Any]
 
             DDLogDebug("Init AR send - \(params.debugDescription)")
@@ -518,24 +450,10 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
         documentReadyState = ""
 
         onStartLoad?()
-
-        barView?.startLoading(self.webView?.url?.absoluteString)
-        barView?.setBackEnabled(self.webView?.canGoBack ?? false)
-        barView?.setForwardEnabled(self.webView?.canGoForward ?? false)
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         DDLogDebug("didFinishNavigation - \(navigation.debugDescription)")
-        //    NSString* loadedURL = [[[self webView] URL] absoluteString];
-        //    [self setLastURL:loadedURL];
-        //
-        //    [[NSUserDefaults standardUserDefaults] setObject:loadedURL forKey:LAST_URL_KEY];
-        //
-        //    [self onFinishLoad]();
-        //
-        //    [[self barView] finishLoading:[[[self webView] URL] absoluteString]];
-        //    [[self barView] setBackEnabled:[[self webView] canGoBack]];
-        //    [[self barView] setForwardEnabled:[[self webView] canGoForward]];
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
@@ -550,10 +468,6 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
         if shouldShowError(error: error as NSError) {
             onError?(error)
         }
-
-        barView?.finishLoading(self.webView?.url?.absoluteString)
-        barView?.setBackEnabled(self.webView?.canGoBack ?? false)
-        barView?.setForwardEnabled(self.webView?.canGoForward ?? false)
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
@@ -568,10 +482,6 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
         if shouldShowError(error: error as NSError) {
             onError?(error)
         }
-
-        barView?.finishLoading(self.webView?.url?.absoluteString)
-        barView?.setBackEnabled(self.webView?.canGoBack ?? false)
-        barView?.setForwardEnabled(self.webView?.canGoForward ?? false)
     }
 
     func webView(_ webView: WKWebView, shouldPreviewElement elementInfo: WKPreviewElementInfo) -> Bool {
@@ -590,8 +500,6 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
 
     func layout() {
         webView?.layoutIfNeeded()
-
-        barView?.layoutIfNeeded()
     }
 
     func setupWebUI() {
@@ -603,84 +511,6 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
         webView?.isUserInteractionEnabled = true
         webView?.scrollView.bounces = false
         webView?.scrollView.bouncesZoom = false
-    }
-
-    func setupBarView() {
-        let barView = Bundle.main.loadNibNamed("BarView", owner: self, options: nil)?.first as? BarView
-        barView?.translatesAutoresizingMaskIntoConstraints = false
-        if let aView = barView {
-            webView?.superview?.addSubview(aView)
-        }
-
-        guard let barTopAnchor = barView?.superview?.topAnchor else { return }
-        guard let barRightAnchor = barView?.superview?.rightAnchor else { return }
-        guard let barLeftAnchor = barView?.superview?.leftAnchor else { return }
-        let topAnchorConstraint: NSLayoutConstraint? = barView?.topAnchor.constraint(equalTo: barTopAnchor)
-        topAnchorConstraint?.isActive = true
-        self.barViewTopAnchorConstraint = topAnchorConstraint
-
-        barView?.leftAnchor.constraint(equalTo: barLeftAnchor).isActive = true
-        barView?.rightAnchor.constraint(equalTo: barRightAnchor).isActive = true
-        let barViewHeightAnchorConstraint: NSLayoutConstraint? = barView?.heightAnchor.constraint(equalToConstant: CGFloat(Constant.urlBarHeight()))
-        self.barViewHeightAnchorConstraint = barViewHeightAnchorConstraint
-        barViewHeightAnchorConstraint?.isActive = true
-
-        self.barView = barView
-
-        weak var blockSelf: WebController? = self
-        weak var blockBar: BarView? = barView
-
-        barView?.backActionBlock = { sender in
-            if blockSelf?.webView?.canGoBack ?? false {
-                blockSelf?.webView?.goBack()
-            } else {
-                blockBar?.setBackEnabled(false)
-            }
-        }
-
-        barView?.forwardActionBlock = { sender in
-            if blockSelf?.webView?.canGoForward ?? false {
-                blockSelf?.webView?.goForward()
-            } else {
-                blockBar?.setForwardEnabled(false)
-            }
-        }
-
-        barView?.homeActionBlock = { sender in
-            self.goHome()
-        }
-
-        barView?.cancelActionBlock = { sender in
-            blockSelf?.webView?.stopLoading()
-        }
-
-        barView?.reloadActionBlock = { sender in
-            blockSelf?.loadURL?(blockBar?.urlFieldText())
-        }
-        
-        barView?.showPermissionsActionBlock = { sender in
-            blockSelf?.onShowPermissions?()
-        }
-
-        barView?.goActionBlock = { url in
-            blockSelf?.loadURL(url)
-        }
-
-        barView?.debugButtonToggledAction = { selected in
-            blockSelf?.onDebugButtonToggled?(selected)
-        }
-
-        barView?.settingsActionBlock = {
-            blockSelf?.onSettingsButtonTapped?()
-        }
-
-        barView?.restartTrackingActionBlock = {
-            blockSelf?.onResetTrackingButtonTapped?()
-        }
-
-        barView?.switchCameraActionBlock = {
-            blockSelf?.onSwitchCameraButtonTapped?()
-        }
     }
 
     func setupWebContent() {
@@ -750,7 +580,7 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
         return versionBuild
     }
 
-    func setupWebView(withRootView rootView: UIView?) {
+    func setupWebView() {
         let conf = WKWebViewConfiguration()
         let contentController = WKUserContentController()
         let version = versionBuild() ?? "unknown"
@@ -758,57 +588,57 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
 
         let standardUserDefaults = UserDefaults.standard
         // Check if we are supposed to be exposing WebXR.
-        if standardUserDefaults.bool(forKey: Constant.exposeWebXRAPIKey()) {
-            let scriptBundle = Bundle(for: WebController.self)
-            let scriptURL = scriptBundle.path(forResource: "webxr", ofType: "js")
-            let scriptContent = try? String(contentsOfFile: scriptURL ?? "", encoding: .utf8)
-
-            print(String(format: "size of webxr.js: %ld", scriptContent?.count ?? 0))
-
-            let userScript = WKUserScript(source: scriptContent ?? "", injectionTime: .atDocumentStart, forMainFrameOnly: true)
-
-            contentController.addUserScript(userScript)
-        }
-        conf.userContentController = contentController
-        self.contentController = contentController
-
-        let pref = WKPreferences()
-        pref.javaScriptEnabled = true
-        conf.preferences = pref
-
-        conf.processPool = WKProcessPool()
-
-        conf.allowsInlineMediaPlayback = true
-        conf.allowsAirPlayForMediaPlayback = true
-        conf.allowsPictureInPictureMediaPlayback = true
-        conf.mediaTypesRequiringUserActionForPlayback = []
-
-        let wv = WKWebView(frame: rootView?.bounds ?? CGRect.zero, configuration: conf)
-        rootView?.addSubview(wv)
-        wv.translatesAutoresizingMaskIntoConstraints = false
-
-        guard let rootTopAnchor = rootView?.topAnchor else { return }
-        guard let rootBottomAnchor = rootView?.bottomAnchor else { return }
-        guard let rootLeftAnchor = rootView?.leftAnchor else { return }
-        guard let rootRightAnchor = rootView?.rightAnchor else { return }
+//        if standardUserDefaults.bool(forKey: Constant.exposeWebXRAPIKey()) {
+//            let scriptBundle = Bundle(for: WebController.self)
+//            let scriptURL = scriptBundle.path(forResource: "webxr", ofType: "js")
+//            let scriptContent = try? String(contentsOfFile: scriptURL ?? "", encoding: .utf8)
+//
+//            print(String(format: "size of webxr.js: %ld", scriptContent?.count ?? 0))
+//
+//            let userScript = WKUserScript(source: scriptContent ?? "", injectionTime: .atDocumentStart, forMainFrameOnly: true)
+//
+//            contentController.addUserScript(userScript)
+//        }
+//        conf.userContentController = contentController
+//        self.contentController = contentController
         
-        let webViewTopAnchorConstraint: NSLayoutConstraint = wv.topAnchor.constraint(equalTo: rootTopAnchor)
-        self.webViewTopAnchorConstraint = webViewTopAnchorConstraint
-        webViewTopAnchorConstraint.isActive = true
-        let webViewLeftAnchorConstraint: NSLayoutConstraint = wv.leftAnchor.constraint(equalTo: rootLeftAnchor)
-        self.webViewLeftAnchorConstraint = webViewLeftAnchorConstraint
-        webViewLeftAnchorConstraint.isActive = true
-        let webViewRightAnchorConstraint: NSLayoutConstraint = wv.rightAnchor.constraint(equalTo: rootRightAnchor)
-        self.webViewRightAnchorConstraint = webViewRightAnchorConstraint
-        webViewRightAnchorConstraint.isActive = true
+        self.contentController = webView?.configuration.userContentController
 
-        wv.bottomAnchor.constraint(equalTo: rootBottomAnchor).isActive = true
+//        let pref = WKPreferences()
+//        pref.javaScriptEnabled = true
+//        conf.preferences = pref
+//
+//        conf.processPool = WKProcessPool()
+//
+//        conf.allowsInlineMediaPlayback = true
+//        conf.allowsAirPlayForMediaPlayback = true
+//        conf.allowsPictureInPictureMediaPlayback = true
+//        conf.mediaTypesRequiringUserActionForPlayback = []
+        
+//        guard let rootTopAnchor = webView?.topAnchor else { return }
+//        guard let rootBottomAnchor = webView?.bottomAnchor else { return }
+//        guard let rootLeftAnchor = webView?.leftAnchor else { return }
+//        guard let rootRightAnchor = webView?.rightAnchor else { return }
+//
+//        NSLog("GOT CONSTRAINTS");
+//
+//        let webViewTopAnchorConstraint: NSLayoutConstraint = wv.topAnchor.constraint(equalTo: rootTopAnchor)
+//        self.webViewTopAnchorConstraint = webViewTopAnchorConstraint
+//        webViewTopAnchorConstraint.isActive = true
+//        let webViewLeftAnchorConstraint: NSLayoutConstraint = wv.leftAnchor.constraint(equalTo: rootLeftAnchor)
+//        self.webViewLeftAnchorConstraint = webViewLeftAnchorConstraint
+//        webViewLeftAnchorConstraint.isActive = true
+//        let webViewRightAnchorConstraint: NSLayoutConstraint = wv.rightAnchor.constraint(equalTo: rootRightAnchor)
+//        self.webViewRightAnchorConstraint = webViewRightAnchorConstraint
+//        webViewRightAnchorConstraint.isActive = true
 
-        wv.scrollView.contentInsetAdjustmentBehavior = .never
+//        webView.bottomAnchor.constraint(equalTo: rootBottomAnchor).isActive = true
 
-        wv.navigationDelegate = self
-        wv.uiDelegate = self
-        webView = wv
+//        webView!.scrollView.contentInsetAdjustmentBehavior = .never
+
+//        webView!.navigationDelegate = self
+//        webView!.uiDelegate = self
+//        webView = wv
     }
 
     func documentDidBecomeInteractive() {
@@ -819,10 +649,6 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
         UserDefaults.standard.set(loadedURL, forKey: LAST_URL_KEY)
 
         onFinishLoad?()
-
-        barView?.finishLoading(webView?.url?.absoluteString)
-        barView?.setBackEnabled(webView?.canGoBack ?? false)
-        barView?.setForwardEnabled(webView?.canGoForward ?? false)
     }
 
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
