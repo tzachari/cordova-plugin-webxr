@@ -2,7 +2,7 @@ const fs = require( 'fs' );
 const path = require( 'path' );
 
 module.exports = function( ctx ) {
-  var rootdir = ctx.opts.plugin.dir;
+  var rootdir = path.join( ctx.opts.plugin.dir, 'XRViewer' );
 
   var replaceInDir = dir => {
     fs.readdirSync( dir ).forEach( f => {
@@ -10,7 +10,7 @@ module.exports = function( ctx ) {
       if ( fs.statSync( file ).isFile() ) {
         if ( path.extname( f ) != '.js' ) {
           var data = fs.readFileSync( file, 'utf8' );
-          data = data.replace( /^.*(CocoaLumberjack|DDLogLevel).*$/mg, '' );
+          data = data.replace( /^.*(XCGLogger).*$/mg, '' );
           fs.writeFileSync( file, data, 'utf8' );
         }
       } else {
