@@ -11,6 +11,7 @@
             <feature name="WebXRPlugin">
                 <param name="ios-package" value="WebXRPlugin" onload="true"/>
             </feature>
+            <preference name="AppendUserAgent" value="Mobile WebXRViewer" />
         </config-file>
 
         <config-file target="*-Info.plist" parent="NSCameraUsageDescription">

@@ -892,7 +892,7 @@ class WebXRPlugin : CDVPlugin {
 
     func handleOnWatchAR(withRequest request: [AnyHashable : Any], initialLoad: Bool, grantedPermissionsBlock: ResultBlock?) {
         weak var blockSelf: WebXRPlugin? = self
-        let access = (WebXRAuthorizationState) .lite
+        let access = (WebXRAuthorizationState) .minimal
 
         if initialLoad {
             arkController?.computerVisionDataEnabled = false
