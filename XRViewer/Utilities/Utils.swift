@@ -122,9 +122,9 @@ extension Dictionary where Value: Equatable {
     }
 }
 
-// func appDelegate() -> AppDelegate {
-//     return UIApplication.shared.delegate as! AppDelegate
-// }
+func appDelegate() -> AppDelegate {
+    return UIApplication.shared.delegate as! AppDelegate
+}
 
 class ClosureSleeve {
     let closure: ()->()

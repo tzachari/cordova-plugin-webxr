@@ -43,6 +43,7 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
     @objc var onCreateDetectionImage: (([AnyHashable : Any], @escaping CreateDetectionImageCompletionBlock) -> Void)?
     @objc var onGetWorldMap: ((@escaping GetWorldMapCompletionBlock) -> Void)?
     @objc var onSetWorldMap: (([AnyHashable : Any], @escaping SetWorldMapCompletionBlock) -> Void)?
+    @objc var animator: Animator?
     @objc weak var webViewTopAnchorConstraint: NSLayoutConstraint?
     @objc var webViewLeftAnchorConstraint: NSLayoutConstraint?
     @objc var webViewRightAnchorConstraint: NSLayoutConstraint?
@@ -126,7 +127,6 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
             self.webViewTopAnchorConstraint?.constant = CGFloat(webViewTopAnchorConstraintConstant)
             self.webView?.superview?.setNeedsLayout()
             self.webView?.superview?.layoutIfNeeded()
-
             let backColor = webXR ? UIColor.clear : UIColor.white
             self.webView?.superview?.backgroundColor = backColor
         })
@@ -596,19 +596,19 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
     }
 
     func setupWebView(withWebView wv: WKWebView) {
-        self.webView = wv
-        self.contentController = wv.configuration.userContentController
-        wv.configuration.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
-        
         let scriptBundle = Bundle.main
         let scriptURL = scriptBundle.path(forResource: "webxrShim", ofType: "js")
         let scriptContent = try? String(contentsOfFile: scriptURL ?? "", encoding: .utf8)
-        
         print(String(format: "size of webxrShim.js: %ld", scriptContent?.count ?? 0))
         
         let userScript = WKUserScript(source: scriptContent ?? "", injectionTime: .atDocumentStart, forMainFrameOnly: true)
-        
+        self.contentController = wv.configuration.userContentController
         self.contentController?.addUserScript(userScript)
+
+        wv.configuration.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
+        wv.navigationDelegate = self
+        wv.uiDelegate = self
+        self.webView = wv
     }
 
     func setupWebView(withRootView rootView: UIView?) {

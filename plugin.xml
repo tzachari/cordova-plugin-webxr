@@ -6,11 +6,13 @@
     <keywords>webxr, immersive web, mozilla, w3c, polyfill, xr, augmented reality, ar, virtual reality, vr, arkit</keywords>
     <platform name="ios">
         <preference name="CAMERA_USAGE_DESCRIPTION" default="This app uses the camera for augmented reality"/>
+        <preference name="WEBXR_AUTHORIZATION" default="minimal" />
 
         <config-file target="config.xml" parent="/widget">
             <feature name="WebXRPlugin">
                 <param name="ios-package" value="WebXRPlugin" onload="true"/>
             </feature>
+            <preference name="WebXRAuthorization" value="$WEBXR_AUTHORIZATION" />
             <preference name="AppendUserAgent" value="Mobile WebXRViewer" />
         </config-file>
 
@@ -50,6 +52,7 @@
         <header-file src="XRViewer/Resources/XRViewer-Bridging-Header.h" target-dir="Resources" />
         <source-file src="XRViewer/Resources/Prefix.swift" target-dir="Resources" />
 
+        <source-file src="XRViewer/Utilities/Animator.swift" target-dir="Utilities" />
         <source-file src="XRViewer/Utilities/Constants.swift" target-dir="Utilities" />
         <source-file src="XRViewer/Utilities/Utils.swift" target-dir="Utilities" />
 

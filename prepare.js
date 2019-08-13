@@ -11,8 +11,10 @@ module.exports = function( ctx ) {
         if ( path.extname( f ) != '.js' ) {
           var data = fs.readFileSync( file, 'utf8' );
           data = data.replace( /^.*(XCGLogger).*$/mg, '' );
+          data = data.replace( /func appDelegate[^}]*\n}/, '' );
+          data = data.replace( /= .fade/, '= kCATransitionFade' );
           fs.writeFileSync( file, data, 'utf8' );
-        }
+        } 
       } else {
         replaceInDir( file );          
       }

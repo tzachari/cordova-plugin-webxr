@@ -9,6 +9,7 @@ class WebXRPlugin : CDVPlugin {
     var arkController: ARKController?
     var webController: WebController?
 //    private var locationManager: LocationManager?
+    private var animator: Animator?
     private var timerSessionRunningInBackground: Timer?
     private var deferredHitTest: (Int, CGFloat, CGFloat, ResultArrayBlock)? = nil
     private var savedRender: Block? = nil
@@ -102,6 +103,7 @@ class WebXRPlugin : CDVPlugin {
     
     func setupCommonControllers() {
         setupStateController()
+        setupAnimator()
         setupNotifications()
     }
 
@@ -292,6 +294,10 @@ class WebXRPlugin : CDVPlugin {
         setupARKController()
     }
 
+    func setupAnimator() {
+        self.animator = Animator()
+    }
+
     func setupNotifications() {
         weak var blockSelf: WebXRPlugin? = self
         
@@ -438,6 +444,8 @@ class WebXRPlugin : CDVPlugin {
             blockSelf?.webController?.updateWindowSize()
         }
 
+        animator?.animate(arkLayerView, toFade: false)
+
         arkController?.startSession(with: stateController.state)
         
         if arkController?.usingMetal ?? false {
@@ -464,7 +472,9 @@ class WebXRPlugin : CDVPlugin {
         if !ARKController.supportsARFaceTrackingConfiguration() {
 //            webController?.hideCameraFlipButton()
         }
+        webController?.animator = animator
         webController?.onStartLoad = {
+            self.cleanARKController()
             if blockSelf?.arkController != nil {
                 blockSelf?.arkController?.controller.previewingSinglePlane = false
                 let lastURL = blockSelf?.webController?.lastURL
@@ -790,7 +800,7 @@ class WebXRPlugin : CDVPlugin {
     // MARK: - Cleanups
     
     func cleanupCommonControllers() {
-//        animator?.clean()
+        animator?.clean()
         stateController.state = AppState.defaultState()
 //        messageController?.clean()
     }
@@ -892,8 +902,23 @@ class WebXRPlugin : CDVPlugin {
 
     func handleOnWatchAR(withRequest request: [AnyHashable : Any], initialLoad: Bool, grantedPermissionsBlock: ResultBlock?) {
         weak var blockSelf: WebXRPlugin? = self
-        let access = (WebXRAuthorizationState) .minimal
-
+        let accessString = self.commandDelegate.settings["webxrauthorization"] as? String
+        print("AUTH: \(accessString ?? "")")
+        var access: WebXRAuthorizationState
+        
+        switch accessString ?? "" {
+            case "denied":
+                access = .denied
+            case "lite":
+                access = .lite
+            case "videoCameraAccess":
+                access = .videoCameraAccess
+            case "worldSensing":
+                access = .worldSensing
+            default:
+                access = .minimal
+        }
+        
         if initialLoad {
             arkController?.computerVisionDataEnabled = false
             stateController.state.userGrantedSendingComputerVisionData = false
