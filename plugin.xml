@@ -3,7 +3,7 @@
     <description>WebXR Plugin</description>
     <author>Thomas Zachariah</author>
     <license>Apache 2.0</license>
-    <keywords>webxr, immersive web, mozilla, w3c, polyfill, xr, augmented reality, ar, virtual reality, vr, arkit</keywords>
+    <keywords>webxr, webar, webvr, immersive web, mixed reality, xr, augmented reality, ar, virtual reality, vr, arkit, mozilla, w3c, polyfill</keywords>
     <platform name="ios">
         <preference name="CAMERA_USAGE_DESCRIPTION" default="This app uses the camera for augmented reality"/>
         <preference name="WEBXR_AUTHORIZATION" default="minimal" />
