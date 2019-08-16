@@ -7,13 +7,15 @@
     <platform name="ios">
         <preference name="CAMERA_USAGE_DESCRIPTION" default="This app uses the camera for augmented reality"/>
         <preference name="WEBXR_AUTHORIZATION" default="minimal" />
+        <preference name="GRAPHICS_FRAMEWORK" default="sceneKit" />
+        <preference name="PRODUCT_MODULE_NAME" default=" " />
 
         <config-file target="config.xml" parent="/widget">
             <feature name="WebXRPlugin">
                 <param name="ios-package" value="WebXRPlugin" onload="true"/>
             </feature>
             <preference name="WebXRAuthorization" value="$WEBXR_AUTHORIZATION" />
-            <preference name="AppendUserAgent" value="Mobile WebXRViewer" />
+            <preference name="GraphicsFramework" value="$GRAPHICS_FRAMEWORK" />
         </config-file>
 
         <config-file target="*-Info.plist" parent="NSCameraUsageDescription">

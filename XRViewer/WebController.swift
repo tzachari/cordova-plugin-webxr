@@ -604,7 +604,11 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
         let userScript = WKUserScript(source: scriptContent ?? "", injectionTime: .atDocumentStart, forMainFrameOnly: true)
         self.contentController = wv.configuration.userContentController
         self.contentController?.addUserScript(userScript)
-
+    
+        wv.evaluateJavaScript("navigator.userAgent", completionHandler: { ( base, error ) in
+            wv.customUserAgent = (base as? String ?? "") + " Mobile WebXRViewer/1.17"
+        })
+        
         wv.configuration.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
         wv.navigationDelegate = self
         wv.uiDelegate = self

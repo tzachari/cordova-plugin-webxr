@@ -357,7 +357,8 @@ class WebXRPlugin : CDVPlugin {
 
         weak var blockSelf: WebXRPlugin? = self
 
-        arkController = ARKController(type: UserDefaults.standard.bool(forKey: Constant.useMetalForARKey()) ? .metal : .sceneKit, rootView: arkLayerView)
+        let frameworkString = self.commandDelegate.settings["graphicsframework"] as? String
+        arkController = ARKController(type: frameworkString == "metal" ? .metal : .sceneKit, rootView: arkLayerView)
 
         arkController?.didUpdate = { c in
             guard let shouldSendNativeTime = blockSelf?.stateController.shouldSendNativeTime() else { return }
