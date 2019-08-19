@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-webxr",
-  "version": "1.17.0",
+  "version": "1.17.1",
   "description": "WebXR Plugin",
   "cordova": {
     "id": "cordova-plugin-webxr",
@@ -9,22 +9,21 @@
     ]
   },
   "keywords": [
-    "ar", 
-    "vr", 
-    "xr", 
+    "ar",
+    "vr",
+    "xr",
     "w3c",
-    "arkit", 
+    "arkit",
     "webar",
     "webvr",
-    "webxr", 
-    "mozilla", 
-    "polyfill", 
-    "augmented reality", 
-    "virtual reality", 
+    "webxr",
+    "mozilla",
+    "polyfill",
+    "augmented reality",
+    "virtual reality",
     "mixed reality",
-    "immersive web", 
+    "immersive web",
     "ecosystem:cordova",
-    "cordova-android",
     "cordova-ios"
   ],
   "engines": [
@@ -34,5 +33,13 @@
     }
   ],
   "author": "Thomas Zachariah",
-  "license": "Apache 2.0"
+  "license": "Apache 2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tzachari/cordova-plugin-webxr.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tzachari/cordova-plugin-webxr/issues"
+  },
+  "homepage": "https://github.com/tzachari/cordova-plugin-webxr#readme"
 }
