@@ -11,13 +11,6 @@ Install using the Apache Cordova command line:
 
     cordova plugin add cordova-plugin-webxr
 
-This plugin can only be used on [ARKit-compatible devices](https://www.apple.com/ios/augmented-reality/#ac-globalfooter) and requires an iOS Deployment Target of 12.0 or higher. 
-Make sure to adjust the project config.xml accordingly, e.g:
-
-    <platform name="ios">
-      <preference name="deployment-target" value="12.0.0" />
-    </platform>
-
 
 ## Try It Out
 
@@ -33,11 +26,11 @@ The source code for the examples can be found in Mozilla's [webxr-ios-js repo](h
 The plugin provides a set of a configurable options:
 
 - **WEBXR_AUTHORIZATION**: Sets what is shared with a page that uses the WebXR API
-  - `denied`: Shares no world sensing data and no video
+  - `denied`: Shares no world sensing data & no video
   - `minimal` (default): Shares minimal world sensing data, but no video
   - `lite`: Shares one real world plane & enables face-based experiences, but no video
   - `worldSensing`: Shares full world sensing data, but no video
-  - `videoCameraAccess`: Shares full world sensing data and video feed
+  - `videoCameraAccess`: Shares full world sensing data & video feed
 
 - **GRAPHICS_FRAMEWORK**: Specifies which graphics framework to use
   - `sceneKit` (default): Uses [SceneKit](https://developer.apple.com/scenekit/)
@@ -65,9 +58,10 @@ Mozilla is in the process of aligning [their version of the API](https://github.
 As such, some features are currently broken.
 This plugin will be updated as the API stabilizes.
 
+
 ## Dependencies
 
-- **iOS 12 / ARKit 2**: The plugin can only be used on ARKit-compatible devices and requires an iOS Deployment Target of 12.0 or higher. 
+- **iOS 12 / ARKit 2**: The plugin only works with [ARKit-compatible devices](https://www.apple.com/ios/augmented-reality/#ac-globalfooter) & requires an iOS Deployment Target ≥ 12.0. It will automatically set the project's target to 12.0, unless specified otherwise in config.xml.
 
 - **Swift 4**: The iOS source code assumes Swift 4.0. It will automatically install `cordova-plugin-add-swift-support`, if it is not already present.
 

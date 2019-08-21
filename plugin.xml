@@ -1,4 +1,4 @@
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-webxr" version="1.17.1">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-webxr" version="1.17.2">
     <name>WebXR</name>
     <description>WebXR Plugin</description>
     <author>Thomas Zachariah</author>
@@ -16,6 +16,7 @@
             </feature>
             <preference name="WebXRAuthorization" value="$WEBXR_AUTHORIZATION" />
             <preference name="GraphicsFramework" value="$GRAPHICS_FRAMEWORK" />
+            <preference name="deployment-target" value="12.0.0" />
         </config-file>
 
         <config-file target="*-Info.plist" parent="NSCameraUsageDescription">
@@ -58,7 +59,6 @@
         <source-file src="XRViewer/Utilities/Constants.swift" target-dir="Utilities" />
         <source-file src="XRViewer/Utilities/Utils.swift" target-dir="Utilities" />
 
-        <header-file src="XRViewer/XRViewer-Swift.h" />
         <source-file src="XRViewer/WebXRPlugin.swift" />
         <source-file src="XRViewer/WebController.swift" />
 
@@ -69,14 +69,5 @@
 
         <resource-file src="XRViewer/Resources/webxrShim.js" target-dir="Resources" />
         <resource-file src="XRViewer/Resources/webxrPolyfill.js" target-dir="Resources" />
-
-        <info>
-            This plugin requires an iOS Deployment Target of 12.0 or higher. 
-            Make sure to adjust config.xml accordingly, e.g:
-
-            &lt;platform name="ios"&gt;
-                &lt;preference name="deployment-target" value="12.0.0" /&gt;
-            &lt;/platform&gt;
-        </info>
     </platform>
 </plugin>
