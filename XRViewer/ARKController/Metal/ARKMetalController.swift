@@ -9,10 +9,12 @@ class ARKMetalController: NSObject, ARKControllerProtocol, MTKViewDelegate {
     
     private var session: ARSession
     var renderer: Renderer!
-    private var renderView: MTKView?
+    var bufferAllocator: BufferAllocator!
+    var device: MTLDevice!
+    private var renderView = MTKView()
     private var anchorsNodes: [AnchorNode] = []
     
-    private var showMode: ShowMode? {
+    var showMode: ShowMode? {
         didSet {
             updateModes()
         }
@@ -22,35 +24,31 @@ class ARKMetalController: NSObject, ARKControllerProtocol, MTKViewDelegate {
             updateModes()
         }
     }
-    var planes: [UUID : PlaneNode] = [:]
+    var planes: [UUID : Node] = [:]
     private var planeHitTestResults: [ARHitTestResult] = []
     private var currentHitTest: HitTestResult?
     private var hitTestFocusPoint = CGPoint.zero
     var previewingSinglePlane: Bool = false
-    var focusedPlane: PlaneNode? {
+    var focusedPlane: Node? {
         didSet {
-            if focusedPlane == nil {
-                oldValue?.geometry?.firstMaterial?.diffuse.contents = UIImage(named: "Models.scnassets/plane_grid1.png")
-            }
+            oldValue?.geometry?.elements.first?.material.diffuse.contents = UIColor.yellow
         }
     }
     var readyToRenderFrame: Bool = true
     var initializingRender: Bool = true
     
     deinit {
-        for view in renderView?.subviews ?? [] {
+        for view in renderView.subviews {
             view.removeFromSuperview()
         }
-        renderView?.delegate = nil
-        if let _ = renderView {
-            renderView = nil
-        }
+        renderView.delegate = nil
         appDelegate().logger.debug("ARKMetalController dealloc")
     }
     
     required init(sesion session: ARSession, size: CGSize) {
         self.session = session
         super.init()
+        
         if setupAR(with: session) == false {
             print("Error setting up AR Session with Metal")
         }
@@ -95,13 +93,10 @@ class ARKMetalController: NSObject, ARKControllerProtocol, MTKViewDelegate {
 
     func updateModes() {
         guard let showMode = showMode else { return }
-//        guard let showOptions = showOptions else { return }
         if showMode == ShowMode.urlDebug || showMode == ShowMode.debug {
-//            renderView?.showsStatistics = (showOptions.rawValue & ShowOptions.ARStatistics.rawValue) != 0
-//            renderView?.debugOptions = (showOptions.rawValue & ShowOptions.ARPoints.rawValue) != 0 ? .showFeaturePoints : []
+            renderer.showDebugPlanes = true
         } else {
-//            renderView?.showsStatistics = false
-//            renderView?.debugOptions = []
+            renderer.showDebugPlanes = false
         }
     }
     
@@ -115,13 +110,9 @@ class ARKMetalController: NSObject, ARKControllerProtocol, MTKViewDelegate {
     func setupAR(with session: ARSession) -> Bool {
         renderView = MTKView()
         renderView = MTKView(frame: UIScreen.main.bounds, device: MTLCreateSystemDefaultDevice())
-        renderView?.backgroundColor = UIColor.clear
-        renderView?.delegate = self
+        renderView.backgroundColor = UIColor.clear
+        renderView.delegate = self
         
-        guard let renderView = renderView else {
-            appDelegate().logger.error("Error accessing the renderView")
-            return false
-        }
         guard let device = renderView.device else {
             appDelegate().logger.error("Metal is not supported on this device")
             return false
@@ -129,6 +120,12 @@ class ARKMetalController: NSObject, ARKControllerProtocol, MTKViewDelegate {
 
         renderer = Renderer(session: session, metalDevice: device, renderDestination: renderView)
         renderer.drawRectResized(size: renderView.bounds.size)
+        let scene = Scene()
+        let cameraNode = Node()
+        cameraNode.camera = Camera()
+        renderer.scene = scene
+        renderer.pointOfView = cameraNode
+        bufferAllocator = BufferAllocator(device: device)
         
         return true
     }
@@ -137,12 +134,12 @@ class ARKMetalController: NSObject, ARKControllerProtocol, MTKViewDelegate {
     
     // MARK: - ARKControllerProtocol
     
-    func getRenderView() -> UIView! {
+    func getRenderView() -> UIView {
         return renderView
     }
     
     func setHitTestFocus(_ point: CGPoint) {
-        return
+        hitTestFocusPoint = point
     }
     
     func setShowMode(_ mode: ShowMode) {
@@ -163,6 +160,35 @@ class ARKMetalController: NSObject, ARKControllerProtocol, MTKViewDelegate {
         guard readyToRenderFrame || initializingRender else {
             return
         }
-        renderer.update()
+        renderer.update(view: view)
+    }
+    
+    // MARK: - Plane Rendering
+    
+    func renderer(didAddNode node: Node, forAnchor anchor: ARAnchor) {
+        guard let planeAnchor = anchor as? ARPlaneAnchor else { return }
+        let planeGeometry = planeAnchor.geometry
+        let nodeGeometry = Plane(vertices: planeGeometry.vertices,
+                                 texCoords: planeGeometry.textureCoordinates,
+                                 indices: planeGeometry.triangleIndices, bufferAllocator: bufferAllocator)
+        node.geometry = nodeGeometry
+        let material = node.geometry?.elements.first?.material
+        material?.diffuse.contents = UIColor.yellow
+//        material?.fillMode = .solid
+        material?.fillMode = .wireframe
+    }
+    
+    func renderer(didUpdateNode node: Node, forAnchor anchor: ARAnchor) {
+        if let planeAnchor = anchor as? ARPlaneAnchor {
+            let planeGeometry = planeAnchor.geometry
+            node.geometry = Plane(vertices: planeGeometry.vertices,
+                                  texCoords: planeGeometry.textureCoordinates,
+                                  indices: planeGeometry.triangleIndices,
+                                  bufferAllocator: bufferAllocator)
+            let material = node.geometry?.elements.first?.material
+            material?.diffuse.contents = UIColor.yellow
+//            material?.fillMode = .solid
+            material?.fillMode = .wireframe
+        }
     }
 }

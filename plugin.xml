@@ -1,4 +1,4 @@
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-webxr" version="1.17.2">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-webxr" version="1.17.3">
     <name>WebXR</name>
     <description>WebXR Plugin</description>
     <author>Thomas Zachariah</author>
@@ -24,8 +24,7 @@
         </config-file>
 
         <header-file src="XRViewer/ARKController/ARKHelper.h" target-dir="ARKController" /> 
-        <header-file src="XRViewer/ARKController/ARKController.h" target-dir="ARKController" />
-        <source-file src="XRViewer/ARKController/ARKController.m" target-dir="ARKController" />
+        <source-file src="XRViewer/ARKController/ARKController.swift" target-dir="ARKController" />
         <source-file src="XRViewer/ARKController/ARKController+Anchors.swift" target-dir="ARKController" />
         <source-file src="XRViewer/ARKController/ARKController+AppState.swift" target-dir="ARKController" />
         <source-file src="XRViewer/ARKController/ARKController+ARSessionDelegate.swift" target-dir="ARKController" />
@@ -39,8 +38,20 @@
         
         <source-file src="XRViewer/ARKController/Metal/ARKMetalController.swift" target-dir="ARKController/Metal" />
         <header-file src="XRViewer/ARKController/Metal/Render/ShaderTypes.h" target-dir="ARKController/Metal/Render" />
+        <source-file src="XRViewer/ARKController/Metal/Render/BlinnPhong.metal" target-dir="ARKController/Metal/Render" />
+        <source-file src="XRViewer/ARKController/Metal/Render/BufferAllocator.swift" target-dir="ARKController/Metal/Render" />
+        <source-file src="XRViewer/ARKController/Metal/Render/Camera.swift" target-dir="ARKController/Metal/Render" />
+        <source-file src="XRViewer/ARKController/Metal/Render/Geometry.swift" target-dir="ARKController/Metal/Render" />
+        <source-file src="XRViewer/ARKController/Metal/Render/Light.swift" target-dir="ARKController/Metal/Render" />
+        <source-file src="XRViewer/ARKController/Metal/Render/Material.swift" target-dir="ARKController/Metal/Render" />
+        <source-file src="XRViewer/ARKController/Metal/Render/MathUtilities.swift" target-dir="ARKController/Metal/Render" />
+        <source-file src="XRViewer/ARKController/Metal/Render/Node.swift" target-dir="ARKController/Metal/Render" />
+        <source-file src="XRViewer/ARKController/Metal/Render/Plane.swift" target-dir="ARKController/Metal/Render" />
         <source-file src="XRViewer/ARKController/Metal/Render/Renderer.swift" target-dir="ARKController/Metal/Render" />
+        <source-file src="XRViewer/ARKController/Metal/Render/Scene.swift" target-dir="ARKController/Metal/Render" />
+        <source-file src="XRViewer/ARKController/Metal/Render/ShaderManager.swift" target-dir="ARKController/Metal/Render" />
         <source-file src="XRViewer/ARKController/Metal/Render/Shaders.metal" target-dir="ARKController/Metal/Render" />
+        <source-file src="XRViewer/ARKController/Metal/Render/Transform.swift" target-dir="ARKController/Metal/Render" />
 
         <source-file src="XRViewer/ARKController/SceneKit/ARKSceneKitController.swift" target-dir="ARKController/SceneKit" />
         <source-file src="XRViewer/ARKController/SceneKit/ARSCNView+HitTest.swift" target-dir="ARKController/SceneKit" />

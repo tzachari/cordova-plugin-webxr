@@ -19,7 +19,6 @@ module.exports = function( ctx ) {
           data = data.replace( /^.*(XCGLogger).*$/mg, '' );
           data = data.replace( /func appDelegate[^}]*\n}/, '' );
           data = data.replace( /= .fade/, '= kCATransitionFade' );
-          data = data.replace( /\w+-Swift/, projectName.replace(' ','_') + '-Swift' )
           fs.writeFileSync( file, data, 'utf8' );
         } 
       } else {

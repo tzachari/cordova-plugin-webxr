@@ -17,7 +17,7 @@
         } else if updatedAnchor is ARFaceAnchor {
             // System generated ARFaceAnchor
             guard let faceAnchor = updatedAnchor as? ARFaceAnchor else { return }
-            updateFaceAnchorData(faceAnchor, to: anchorDictionary)
+            updateFaceAnchorData(faceAnchor, toDictionary: anchorDictionary)
         } else {
             // Simple, user generated ARAnchor, do nothing more than updating the transform
             return
@@ -50,7 +50,7 @@
             anchorDictionary[WEB_AR_ANCHOR_TYPE] = "face"
         } else {
             // Simple, user generated ARAnchor
-            let userAnchorID = arkitGeneratedAnchorIDUserAnchorIDMap?[addedAnchor.identifier.uuidString] as? String
+            let userAnchorID = arkitGeneratedAnchorIDUserAnchorIDMap[addedAnchor.identifier.uuidString] as? String
             let name = userAnchorID != nil ? userAnchorID : addedAnchor.identifier.uuidString
             anchorDictionary[WEB_AR_UUID_OPTION] = name ?? ""
             anchorDictionary[WEB_AR_ANCHOR_TYPE] = "anchor"
@@ -62,30 +62,36 @@
     
     // MARK: - Face Anchors
     
-    // Tony: Commenting this out, conversion to Swift is causing issues again.
-    // Tried several resolutions, none worked so far. Leaving original in place for the moment.
-//    func updateFaceAnchorData(_ faceAnchor: ARFaceAnchor, toDictionary faceAnchorDictionary: NSMutableDictionary) {
-//        var geometryDictionary: [AnyHashable: Any]? = faceAnchorDictionary[WEB_AR_GEOMETRY_OPTION] as? Dictionary
-//        if geometryDictionary == nil {
-//            geometryDictionary = [AnyHashable: Any]()
-//            faceAnchorDictionary[WEB_AR_GEOMETRY_OPTION] = geometryDictionary
-//        }
-//        let vertices = NSMutableArray.init(capacity: faceAnchor.geometry.vertices.count)
-//        for i in 0..<faceAnchor.geometry.vertices.count {
-//            vertices.add(faceAnchor.geometry.vertices[i].dictionary())
-//        }
-//        geometryDictionary?["vertices"] = vertices
-//
-//        guard let blendShapesDictionary = faceAnchorDictionary[WEB_AR_BLEND_SHAPES_OPTION] as? NSMutableArray else { return }
-//        setBlendShapes(faceAnchor.blendShapes as NSDictionary, toArray: blendShapesDictionary)
-//
-//        // Remove the rest of the geometry data, since it doesn't change
-//        geometryDictionary?["vertexCount"] = nil
-//        geometryDictionary?["textureCoordinateCount"] = nil
-//        geometryDictionary?["textureCoordinates"] = nil
-//        geometryDictionary?["triangleCount"] = nil
-//        geometryDictionary?["triangleIndices"] = nil
-//    }
+    func updateFaceAnchorData(_ faceAnchor: ARFaceAnchor, toDictionary faceAnchorDictionary: NSMutableDictionary) {
+        var geometryDictionary = faceAnchorDictionary[WEB_AR_GEOMETRY_OPTION] as? NSMutableDictionary
+        if geometryDictionary == nil {
+            geometryDictionary = NSMutableDictionary.init()
+            faceAnchorDictionary[WEB_AR_GEOMETRY_OPTION] = geometryDictionary
+        }
+        let vertices = NSMutableArray.init(capacity: faceAnchor.geometry.vertices.count)
+        let faceVertices = faceAnchor.geometry.vertices
+        for i in 0..<faceAnchor.geometry.vertices.count {
+            if geometryArrays {
+                vertices.add(NSNumber(value: faceVertices[i].x))
+                vertices.add(NSNumber(value: faceVertices[i].y))
+                vertices.add(NSNumber(value: faceVertices[i].z))
+            } else {
+                vertices.add(dictFromVector3(faceAnchor.geometry.vertices[i]))
+            }
+        }
+        geometryDictionary?["vertices"] = vertices
+        
+        if let blendShapesDictionary = faceAnchorDictionary[WEB_AR_BLEND_SHAPES_OPTION] as? NSMutableArray {
+            setBlendShapes(faceAnchor.blendShapes as NSDictionary, toArray: blendShapesDictionary)
+        }
+
+        // Remove the rest of the geometry data, since it doesn't change
+        geometryDictionary?["vertexCount"] = nil
+        geometryDictionary?["textureCoordinateCount"] = nil
+        geometryDictionary?["textureCoordinates"] = nil
+        geometryDictionary?["triangleCount"] = nil
+        geometryDictionary?["triangleIndices"] = nil
+    }
     
     func addFaceAnchorData(_ faceAnchor: ARFaceAnchor, toDictionary faceAnchorDictionary: NSMutableDictionary) {
         let blendShapesArray = NSMutableArray.init()
@@ -134,7 +140,6 @@
     }
     
     func setBlendShapes(_ blendShapes: NSDictionary, toArray blendShapesArray: NSMutableArray) {
-        let blendShapesArray = blendShapesArray
         blendShapesArray[0] = blendShapes[ARFaceAnchor.BlendShapeLocation.browDownLeft] ?? 0
         blendShapesArray[1] = blendShapes[ARFaceAnchor.BlendShapeLocation.browDownRight] ?? 0
         blendShapesArray[2] = blendShapes[ARFaceAnchor.BlendShapeLocation.browInnerUp] ?? 0
@@ -267,11 +272,11 @@
         for anchorIDToDelete in anchorIDsToDelete as? [String] ?? [] {
             var anchorToDelete: ARAnchor? = getAnchorFromUserAnchorID(anchorIDToDelete)
             if let anchorToDelete = anchorToDelete {
-                session.remove(anchor: anchorToDelete)
+                session?.remove(anchor: anchorToDelete)
             } else {
                 anchorToDelete = getAnchorFromARKitAnchorID(anchorIDToDelete)
                 if let anchorToDelete = anchorToDelete {
-                    session.remove(anchor: anchorToDelete)
+                    session?.remove(anchor: anchorToDelete)
                 }
             }
         }
@@ -282,7 +287,7 @@
      key "distantAnchorsDistanceKey"
      */
     func removeDistantAnchors() {
-        guard let currentFrame = session.currentFrame else { return }
+        guard let currentFrame = session?.currentFrame else { return }
         let cameraTransform = currentFrame.camera.transform
         let distanceThreshold: Float = UserDefaults.standard.float(forKey: Constant.distantAnchorsDistanceKey())
         
@@ -311,13 +316,13 @@
                     (center2 + extent2) < -distanceThreshold {
                     
                     print("\n\n*********\n\nRemoving distant plane \(anchor.identifier.uuidString)\n\n*********")
-                    session.remove(anchor: anchor)
+                    session?.remove(anchor: anchor)
                 }
             } else {
                 let distance = simd_distance(anchor.transform.columns.3, cameraTransform.columns.3)
                 if distance >= distanceThreshold {
                     print("\n\n*********\n\nRemoving distant anchor \(anchor.identifier.uuidString)\n\n*********")
-                    session.remove(anchor: anchor)
+                    session?.remove(anchor: anchor)
                 }
             }
         }
@@ -423,7 +428,7 @@
             anchorID = anchor.identifier.uuidString
         } else {
             // Simple, user generated ARAnchor
-            let userAnchorID = arkitGeneratedAnchorIDUserAnchorIDMap?[anchor.identifier.uuidString] as? String
+            let userAnchorID = arkitGeneratedAnchorIDUserAnchorIDMap[anchor.identifier.uuidString] as? String
             //        NSString *anchorName = anchor.name;
             //        NSString *name;
             //        if (userAnchorID) {
@@ -458,8 +463,8 @@
         var matrix = matrix_float4x4()
         matrix = transform.matrix()
         let anchor = ARAnchor(name: userGeneratedAnchorID ?? "", transform: matrix)
-        session.add(anchor: anchor)
-        arkitGeneratedAnchorIDUserAnchorIDMap?[anchor.identifier.uuidString] = userGeneratedAnchorID ?? ""
+        session?.add(anchor: anchor)
+        arkitGeneratedAnchorIDUserAnchorIDMap[anchor.identifier.uuidString] = userGeneratedAnchorID ?? ""
 
         return true
     }

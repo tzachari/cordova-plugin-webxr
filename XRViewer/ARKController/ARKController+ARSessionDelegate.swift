@@ -7,11 +7,34 @@ extension ARKController: ARSessionDelegate {
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
         if !usingMetal {
             updateARKData(with: frame)
-            didUpdate(self)
+            didUpdate?(self)
+        } else {
+            if let controller = controller as? ARKMetalController {
+                controller.renderer.interfaceOrientation = UIApplication.shared.statusBarOrientation
+                
+                if controller.previewingSinglePlane,
+                    let frame = session.currentFrame
+                {
+                    let boundsSize = controller.getRenderView().bounds.size
+                    controller.renderer.showDebugPlanes = true
+                    let transform = frame.displayTransform(for: controller.renderer.interfaceOrientation, viewportSize: boundsSize)
+                    let frameUnitPoint = CGPoint(x: 0.5, y: 0.5).applying(transform.inverted())
+                    
+                    if let firstHitTestResult = frame.hitTest(frameUnitPoint, types: .existingPlaneUsingGeometry).first,
+                        let anchor = firstHitTestResult.anchor,
+                        let node = controller.planes[anchor.identifier]
+                    {
+                        controller.focusedPlane = node
+                        node.geometry?.elements.first?.material.diffuse.contents = UIColor.green
+                    }
+                } else if controller.showMode != .debug && controller.showMode != .urlDebug {
+                    controller.renderer.showDebugPlanes = false
+                }
+            }
         }
         if shouldUpdateWindowSize {
             self.shouldUpdateWindowSize = false
-            didUpdateWindowSize()
+            didUpdateWindowSize?()
         }
     }
     
@@ -30,6 +53,16 @@ extension ARKController: ARSessionDelegate {
             if addedAnchor is ARFaceAnchor && !(configuration is ARFaceTrackingConfiguration) {
                 print("Trying to add a face anchor to a session configuration that's not ARFaceTrackingConfiguration")
                 continue
+            }
+
+            if usingMetal,
+                let controller = controller as? ARKMetalController
+            {
+                let node = Node()
+                controller.planes[addedAnchor.identifier] = node
+                node.transform = Transform(from: addedAnchor.transform)
+                controller.renderer.scene?.rootNode.addChildNode(node)
+                controller.renderer(didAddNode: node, forAnchor: addedAnchor)
             }
             
             if shouldSend(addedAnchor)
@@ -75,6 +108,13 @@ extension ARKController: ARSessionDelegate {
                 continue
             }
             
+            if usingMetal,
+                let controller = controller as? ARKMetalController,
+                let node = controller.planes[updatedAnchor.identifier]
+            {
+                node.transform = Transform(from: updatedAnchor.transform)
+                controller.renderer(didUpdateNode: node, forAnchor: updatedAnchor)
+            }
             updateDictionary(for: updatedAnchor)
         }
     }
@@ -84,10 +124,14 @@ extension ARKController: ARSessionDelegate {
         appDelegate().logger.debug("Remove Anchors - \(anchors.debugDescription)")
         for removedAnchor: ARAnchor in anchors {
             
-            // logic makes no sense:  if the anchor is in objects[] list, remove it and send removed flag.  otherwise, ignore
-            //        BOOL mustSendAnchor = [self shouldSendAnchor: removedAnchor];
-            //        if (mustSendAnchor ||
-            //            self.sendingWorldSensingDataAuthorizationStatus == SendWorldSensingDataAuthorizationStateAuthorized) {
+            if usingMetal,
+                let controller = controller as? ARKMetalController,
+                let node = controller.planes[removedAnchor.identifier]
+            {
+                node.removeFromParentNode()
+                controller.planes[removedAnchor.identifier] = nil
+            }
+            
             let anchorID = self.anchorID(for: removedAnchor)
             if objects[anchorID] != nil {
                 removedAnchorsSinceLastFrame.add(anchorID)
