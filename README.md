@@ -36,6 +36,9 @@ The plugin provides a set of a configurable options:
   - `sceneKit` (default): Uses [SceneKit](https://developer.apple.com/scenekit/)
   - `metal`: Uses [Metal](https://developer.apple.com/metal/) (experimental)
 
+- **CAMERA_USAGE_DESCRIPTION**: Describes to user why camera access is required
+  - Default: `This app uses the camera for augmented reality`
+
 To set these options, specify them when adding the plugin, e.g:
 
     cordova plugin add cordova-plugin-webxr --variable GRAPHICS_FRAMEWORK=metal
@@ -45,12 +48,6 @@ Or add them within the plugin's tag in config.xml, e.g:
     <plugin name="cordova-plugin-webxr" spec="^1.17.0">
         <variable name="WEBXR_AUTHORIZATION" value="lite" />
     </plugin>
-
-There are also some additional parameters that can be overridden:
-
-- **CAMERA_USAGE_DESCRIPTION**: Describes why camera access is required. Default: `This app uses the camera for augmented reality`
-
-- **PRODUCT_MODULE_NAME**: If the Product Module Name in the iOS Target Build Settings differs from the Cordova project name (e.g. when embedding a Cordova WebView into an existing app), the module name must be passed to this variable. If omitted, the app may not build.
 
 
 ## NOTE: Mozilla WebXR ≠ W3C WebXR (yet)
@@ -70,4 +67,4 @@ This plugin will be updated as the API stabilizes.
 
 ## Credits
 
-This plugin is based on the source for Mozilla's WebXR Viewer ([webxr-ios@d3485fb](https://github.com/mozilla-mobile/webxr-ios/tree/d3485fb65fae52bcfb925cf5feeecca0f66f6f47))
+This plugin is based on the source for Mozilla's WebXR Viewer ([webxr-ios@c91decb](https://github.com/mozilla-mobile/webxr-ios/tree/c91decbecd11b0691f974fb5edc80a06b62cec11))

@@ -2,13 +2,7 @@ const fs = require( 'fs' );
 const path = require( 'path' );
 
 module.exports = function( ctx ) {
-  var CP = ctx.requireCordovaModule('cordova-common/src/ConfigParser/ConfigParser');
   var rootDir = path.join( ctx.opts.plugin.dir, 'XRViewer' );
-
-  var projectName = ctx.opts.plugin.pluginInfo.getPreferences( 'ios' ).PRODUCT_MODULE_NAME;
-  if ( projectName == " " ) {
-    projectName = new CP( path.join( ctx.opts.projectRoot, 'config.xml' ) ).name();
-  }
   
   var replaceInDir = dir => {
     fs.readdirSync( dir ).forEach( f => {
