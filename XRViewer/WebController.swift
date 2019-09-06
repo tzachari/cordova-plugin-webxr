@@ -470,7 +470,14 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-        appDelegate().logger.error("Web Error - \(error)")
+        if error._domain == "WebKitErrorDomain", let info = error._userInfo as? [String:Any], let url = info[NSURLErrorFailingURLStringErrorKey],
+            let urlString = url as? String, urlString.hasPrefix("file:"), urlString.hasSuffix("/") {
+            // Redirect fix to get default HTML page for file path URLs
+            // TODO: Verify this is needed - thought it worked w/o this before; may have broke something elsewhere?
+            loadURL(urlString + "index.html")
+        } else {
+            appDelegate().logger.error("Web Error (didFailProvisional) - \(error)")
+        }
 
         if self.webView?.observationInfo != nil {
             self.webView?.removeObserver(self, forKeyPath: "estimatedProgress")
@@ -484,7 +491,7 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        appDelegate().logger.error("Web Error - \(error)")
+        appDelegate().logger.error("Web Error (didFail) - \(error)")
 
         if self.webView?.observationInfo != nil {
             self.webView?.removeObserver(self as NSObject, forKeyPath: "estimatedProgress")
