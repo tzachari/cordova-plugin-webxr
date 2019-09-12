@@ -191,7 +191,7 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
         })
     }
 
-    @objc func userGrantedWebXRAuthorizationState(_ access: WebXRAuthorizationState) {
+    func userGrantedWebXRAuthorizationState(_ access: WebXRAuthorizationState) {
         // This may change, in one of two ways:
         // - should probably switch this to one method that updates all aspects of the state we want
         // the page to know
@@ -529,7 +529,7 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
         webView?.isOpaque = false
         webView?.backgroundColor = UIColor.clear
         webView?.isUserInteractionEnabled = true
-        webView?.scrollView.bounces = false
+        // webView?.scrollView.bounces = false
         webView?.scrollView.bouncesZoom = false
     }
 

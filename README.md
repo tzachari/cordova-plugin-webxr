@@ -67,4 +67,4 @@ This plugin will be updated as the API stabilizes.
 
 ## Credits
 
-This plugin is based on the source for Mozilla's WebXR Viewer ([webxr-ios@c91decb](https://github.com/mozilla-mobile/webxr-ios/tree/c91decbecd11b0691f974fb5edc80a06b62cec11))
+This plugin is based on the source for Mozilla's WebXR Viewer ([webxr-ios@d631bfb](https://github.com/mozilla-mobile/webxr-ios/tree/d631bfb0a65573c26efe34f53e012427b75da847))

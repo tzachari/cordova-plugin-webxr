@@ -1,4 +1,4 @@
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-webxr" version="1.17.3">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-webxr" version="1.17.4">
     <name>WebXR</name>
     <description>WebXR Plugin</description>
     <author>Thomas Zachariah</author>
@@ -22,7 +22,6 @@
             <string>$CAMERA_USAGE_DESCRIPTION</string>
         </config-file>
 
-        <header-file src="XRViewer/ARKController/ARKHelper.h" target-dir="ARKController" /> 
         <source-file src="XRViewer/ARKController/ARKController.swift" target-dir="ARKController" />
         <source-file src="XRViewer/ARKController/ARKController+Anchors.swift" target-dir="ARKController" />
         <source-file src="XRViewer/ARKController/ARKController+AppState.swift" target-dir="ARKController" />

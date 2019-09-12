@@ -1,6 +1,7 @@
 import Foundation
 import AVFoundation
 import WebKit
+import ARKit
 
 @objc(WebXRPlugin)
 class WebXRPlugin : CDVPlugin {
@@ -43,6 +44,7 @@ class WebXRPlugin : CDVPlugin {
         setupTargetControllers()
     }
 
+    // 9/3/19: Commenting to monitor default failure response and frequency
 //    override func didReceiveMemoryWarning() {
 //        super.didReceiveMemoryWarning()
 //        appDelegate().logger.error("didReceiveMemoryWarning")
@@ -447,7 +449,7 @@ class WebXRPlugin : CDVPlugin {
         
         if arkController?.usingMetal ?? false {
             arkController?.controller.renderer.rendererShouldUpdateFrame = { block in
-                if let frame = blockSelf?.arkController?.session?.currentFrame {
+                if let frame = blockSelf?.arkController?.session.currentFrame {
                     blockSelf?.arkController?.controller.readyToRenderFrame = false
                     blockSelf?.savedRender = block
                     blockSelf?.arkController?.updateARKData(with: frame)
@@ -729,45 +731,45 @@ class WebXRPlugin : CDVPlugin {
     
     private func showOptionsFormDict(dict: [AnyHashable : Any]?) -> ShowOptions {
         if dict == nil {
-            return .Browser
+            return .browser
         }
         
         var options: ShowOptions = .init(rawValue: 0)
         
         if (dict?[WEB_AR_UI_BROWSER_OPTION] as? NSNumber)?.boolValue ?? false {
-            options = [options, .Browser]
+            options = [options, .browser]
         }
         
         if (dict?[WEB_AR_UI_POINTS_OPTION] as? NSNumber)?.boolValue ?? false {
-            options = [options, .ARPoints]
+            options = [options, .arPoints]
         }
         
         if (dict?[WEB_AR_UI_DEBUG_OPTION] as? NSNumber)?.boolValue ?? false {
-            options = [options, .Debug]
+            options = [options, .debug]
         }
         
         if (dict?[WEB_AR_UI_STATISTICS_OPTION] as? NSNumber)?.boolValue ?? false {
-            options = [options, .ARStatistics]
+            options = [options, .arStatistics]
         }
         
         if (dict?[WEB_AR_UI_FOCUS_OPTION] as? NSNumber)?.boolValue ?? false {
-            options = [options, .ARFocus]
+            options = [options, .arFocus]
         }
         
         if (dict?[WEB_AR_UI_BUILD_OPTION] as? NSNumber)?.boolValue ?? false {
-            options = [options, .BuildNumber]
+            options = [options, .buildNumber]
         }
         
         if (dict?[WEB_AR_UI_PLANE_OPTION] as? NSNumber)?.boolValue ?? false {
-            options = [options, .ARPlanes]
+            options = [options, .arPlanes]
         }
         
         if (dict?[WEB_AR_UI_WARNINGS_OPTION] as? NSNumber)?.boolValue ?? false {
-            options = [options, .ARWarnings]
+            options = [options, .arWarnings]
         }
         
         if (dict?[WEB_AR_UI_ANCHORS_OPTION] as? NSNumber)?.boolValue ?? false {
-            options = [options, .ARObject]
+            options = [options, .arObject]
         }
         
         return options
@@ -1054,7 +1056,7 @@ class WebXRPlugin : CDVPlugin {
             if let arController = arkController?.controller as? ARKMetalController {
                 guard let chosenPlane = arController.focusedPlane else { return }
                 if let anchorIdentifier = arController.planes.someKey(forValue: chosenPlane) {
-                    let allFrameAnchors = arkController?.session?.currentFrame?.anchors
+                    let allFrameAnchors = arkController?.session.currentFrame?.anchors
                     let anchor = allFrameAnchors?.filter { $0.identifier == anchorIdentifier }.first
                     if let anchor = anchor {
                         let addedAnchorDictionary = arkController?.createDictionary(for: anchor)
@@ -1065,7 +1067,7 @@ class WebXRPlugin : CDVPlugin {
             } else if let arController = arkController?.controller as? ARKSceneKitController {
                 guard let chosenPlane = arController.focusedPlane else { return }
                 if let anchorIdentifier = arController.planes.someKey(forValue: chosenPlane) {
-                    let allFrameAnchors = arkController?.session?.currentFrame?.anchors
+                    let allFrameAnchors = arkController?.session.currentFrame?.anchors
                     let anchor = allFrameAnchors?.filter { $0.identifier == anchorIdentifier }.first
                     if let anchor = anchor {
                         let addedAnchorDictionary = arkController?.createDictionary(for: anchor)

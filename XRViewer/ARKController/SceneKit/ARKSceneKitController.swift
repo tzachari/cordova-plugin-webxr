@@ -32,6 +32,9 @@ class ARKSceneKitController: NSObject, ARKControllerProtocol, ARSCNViewDelegate 
             }
         }
     }
+    var readyToRenderFrame: Bool = true
+    var initializingRender: Bool = true
+    var renderer: Renderer! = nil
 
     deinit {
         renderView.delegate = nil
@@ -91,8 +94,8 @@ class ARKSceneKitController: NSObject, ARKControllerProtocol, ARSCNViewDelegate 
         guard let showMode = showMode else { return }
         guard let showOptions = showOptions else { return }
         if showMode == ShowMode.urlDebug || showMode == ShowMode.debug {
-            renderView.showsStatistics = (showOptions.rawValue & ShowOptions.ARStatistics.rawValue) != 0
-            renderView.debugOptions = (showOptions.rawValue & ShowOptions.ARPoints.rawValue) != 0 ? .showFeaturePoints : []
+            renderView.showsStatistics = (showOptions.rawValue & ShowOptions.arStatistics.rawValue) != 0
+            renderView.debugOptions = (showOptions.rawValue & ShowOptions.arPoints.rawValue) != 0 ? .showFeaturePoints : []
         } else {
             renderView.showsStatistics = false
             renderView.debugOptions = []
@@ -106,7 +109,7 @@ class ARKSceneKitController: NSObject, ARKControllerProtocol, ARSCNViewDelegate 
         case .normal:
             focus?.show(false)
         default:
-            focus?.show((showOptions.rawValue & ShowOptions.ARFocus.rawValue) != 0)
+            focus?.show((showOptions.rawValue & ShowOptions.arFocus.rawValue) != 0)
         }
     }
 
@@ -151,7 +154,7 @@ class ARKSceneKitController: NSObject, ARKControllerProtocol, ARSCNViewDelegate 
     func hitTest() {
         guard let showOptions = showOptions else { return }
         // hit testing only for Focus node!
-        if (showOptions.rawValue & ShowOptions.ARFocus.rawValue) != 0 {
+        if (showOptions.rawValue & ShowOptions.arFocus.rawValue) != 0 {
             if let aFocus = renderView.hitTest(point: hitTestFocusPoint, withResult: { result in
                 self.currentHitTest = result
 
@@ -178,7 +181,7 @@ class ARKSceneKitController: NSObject, ARKControllerProtocol, ARSCNViewDelegate 
     func updateFocus() {
         guard let showOptions = showOptions else { return }
         if currentHitTest != nil {
-            focus?.show((showOptions.rawValue & ShowOptions.ARFocus.rawValue) != 0)
+            focus?.show((showOptions.rawValue & ShowOptions.arFocus.rawValue) != 0)
         } else {
             focus?.show(false)
         }
@@ -209,14 +212,14 @@ class ARKSceneKitController: NSObject, ARKControllerProtocol, ARSCNViewDelegate 
         guard let showOptions = showOptions else { return }
         for (_, plane) in planes {
             plane.geometry?.firstMaterial?.diffuse.contents = focusedPlane == plane ? UIImage(named: "Models.scnassets/plane_grid2.png") : UIImage(named: "Models.scnassets/plane_grid1.png")
-            plane.show(((showMode == ShowMode.urlDebug) && (showOptions.rawValue & ShowOptions.ARPlanes.rawValue) != 0) || ((showMode == ShowMode.debug) && (showOptions.rawValue & ShowOptions.ARPlanes.rawValue) != 0) || previewingSinglePlane)
+            plane.show(((showMode == ShowMode.urlDebug) && (showOptions.rawValue & ShowOptions.arPlanes.rawValue) != 0) || ((showMode == ShowMode.debug) && (showOptions.rawValue & ShowOptions.arPlanes.rawValue) != 0) || previewingSinglePlane)
         }
     }
 
     func updateAnchors() {
         guard let showOptions = showOptions else { return }
         for anchor in anchorsNodes {
-            anchor.show((showOptions.rawValue & ShowOptions.ARObject.rawValue) != 0)
+            anchor.show((showOptions.rawValue & ShowOptions.arObject.rawValue) != 0)
         }
     }
 
@@ -298,8 +301,4 @@ class ARKSceneKitController: NSObject, ARKControllerProtocol, ARSCNViewDelegate 
     func setShowOptions(_ options: ShowOptions) {
         showOptions = options
     }
-    
-    var readyToRenderFrame: Bool = true
-    var initializingRender: Bool = true
-    var renderer: Renderer! = nil
 }
