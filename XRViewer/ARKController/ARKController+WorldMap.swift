@@ -111,7 +111,7 @@ extension ARKController {
             getWorldMapPromise = nil
         }
         
-        #if ALLOW_GET_WORLDMAP
+        // #if ALLOW_GET_WORLDMAP - Temporary removal; Should add Swift compiler flag for this automatically
         switch webXRAuthorizationStatus {
         case .worldSensing, .videoCameraAccess:
             getWorldMapPromise = completion
@@ -124,9 +124,9 @@ extension ARKController {
             print("Attempt to get World Map but world sensing data authorization is not determined, enqueue the request")
             getWorldMapPromise = completion
         }
-        #else
-        completion(false, "getWorldMap not supported", nil)
-        #endif
+        // #else
+        // completion(false, "getWorldMap not supported", nil)
+        // #endif
     }
     
     // Actually perform the saving and sending of world map back to the app
