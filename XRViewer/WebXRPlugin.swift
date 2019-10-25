@@ -2,6 +2,7 @@ import Foundation
 import AVFoundation
 import WebKit
 import ARKit
+import MetalKit
 
 @objc(WebXRPlugin)
 class WebXRPlugin : CDVPlugin {
@@ -25,7 +26,6 @@ class WebXRPlugin : CDVPlugin {
     var contentPlacementMessageTimer: Timer?
     // Timer for tracking state escalation
     var trackingStateFeedbackEscalationTimer: Timer?
-    
     
     // MARK: - View Lifecycle
     deinit {
@@ -358,7 +358,7 @@ class WebXRPlugin : CDVPlugin {
         let frameworkString = self.commandDelegate.settings["graphicsframework"] as? String
         arkController = ARKController(type: frameworkString == "metal" ? .arkMetal : .arkSceneKit, rootView: arkLayerView)
 
-        arkController?.didUpdate = { c in
+        arkController?.didUpdate = {
             guard let shouldSendNativeTime = blockSelf?.stateController.shouldSendNativeTime() else { return }
             guard let shouldSendARKData = blockSelf?.stateController.shouldSendARKData() else { return }
             guard let shouldSendCVData = blockSelf?.stateController.shouldSendCVData() else { return }
@@ -453,7 +453,7 @@ class WebXRPlugin : CDVPlugin {
                     blockSelf?.arkController?.controller.readyToRenderFrame = false
                     blockSelf?.savedRender = block
                     blockSelf?.arkController?.updateARKData(with: frame)
-                    blockSelf?.arkController?.didUpdate?(blockSelf?.arkController)
+                    blockSelf?.arkController?.didUpdate?()
                 } else {
                     print("Unable to updateARKData since ARFrame isn't ready")
                     block()
@@ -529,9 +529,12 @@ class WebXRPlugin : CDVPlugin {
         
         webController?.onJSFinishedRendering = {
             blockSelf?.arkController?.controller.initializingRender = false
-            blockSelf?.arkController?.controller.readyToRenderFrame = true
             blockSelf?.savedRender?()
             blockSelf?.savedRender = nil
+            blockSelf?.arkController?.controller.readyToRenderFrame = true
+            if let controller = blockSelf?.arkController?.controller as? ARKMetalController {
+                controller.draw(in: controller.renderView)
+            }
         }
 
         webController?.onStopAR = {

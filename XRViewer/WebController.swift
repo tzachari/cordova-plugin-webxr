@@ -12,50 +12,50 @@ typealias SetWorldMapCompletionBlock = (Bool, String?) -> Void
 typealias WebCompletion = (Any?, Error?) -> Void
 
 class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessageHandler {
-    @objc var onInitAR: (([AnyHashable : Any]?) -> Void)?
-    @objc var onError: ((Error?) -> Void)?
-    @objc var loadURL: ((String?) -> Void)?
-    @objc var onJSUpdateData: (() -> [AnyHashable : Any])?
-    @objc var onRemoveObjects: (([Any]) -> Void)?
-    @objc var onSetUI: (([AnyHashable : Any]?) -> Void)?
-    @objc var onHitTest: ((Int, CGFloat, CGFloat, @escaping ResultArrayBlock) -> Void)?
-    @objc var onAddAnchor: ((String?, [AnyHashable: Any]?, @escaping ResultBlock) -> Void)?
-    @objc var onStartLoad: (() -> Void)?
-    @objc var onFinishLoad: (() -> Void)?
-    @objc var onDebugButtonToggled: ((Bool) -> Void)?
+    var onInitAR: (([AnyHashable : Any]?) -> Void)?
+    var onError: ((Error?) -> Void)?
+    var loadURL: ((String?) -> Void)?
+    var onJSUpdateData: (() -> [AnyHashable : Any])?
+    var onRemoveObjects: (([Any]) -> Void)?
+    var onSetUI: (([AnyHashable : Any]?) -> Void)?
+    var onHitTest: ((Int, CGFloat, CGFloat, @escaping ResultArrayBlock) -> Void)?
+    var onAddAnchor: ((String?, [AnyHashable: Any]?, @escaping ResultBlock) -> Void)?
+    var onStartLoad: (() -> Void)?
+    var onFinishLoad: (() -> Void)?
+    var onDebugButtonToggled: ((Bool) -> Void)?
     var onGeometryArraysSet: ((Bool) -> Void)?
-    @objc var onSettingsButtonTapped: (() -> Void)?
-    @objc var onWatchAR: (([AnyHashable : Any]) -> Void)?
-    @objc var onRequestSession: (([AnyHashable: Any], @escaping ResultBlock) -> Void)?
+    var onSettingsButtonTapped: (() -> Void)?
+    var onWatchAR: (([AnyHashable : Any]) -> Void)?
+    var onRequestSession: (([AnyHashable: Any], @escaping ResultBlock) -> Void)?
     var onJSFinishedRendering: (() -> Void)?
-    @objc var onComputerVisionDataRequested: (() -> Void)?
-    @objc var onStopAR: (() -> Void)?
-    @objc var onResetTrackingButtonTapped: (() -> Void)?
-    @objc var onSwitchCameraButtonTapped: (() -> Void)?
-    @objc var onShowPermissions: (() -> Void)?
-    @objc var onStartSendingComputerVisionData: (() -> Void)?
-    @objc var onStopSendingComputerVisionData: (() -> Void)?
+    var onComputerVisionDataRequested: (() -> Void)?
+    var onStopAR: (() -> Void)?
+    var onResetTrackingButtonTapped: (() -> Void)?
+    var onSwitchCameraButtonTapped: (() -> Void)?
+    var onShowPermissions: (() -> Void)?
+    var onStartSendingComputerVisionData: (() -> Void)?
+    var onStopSendingComputerVisionData: (() -> Void)?
     var onSetNumberOfTrackedImages: ((Int) -> Void)?
-    @objc var onAddImageAnchor: (([AnyHashable : Any]?, @escaping ImageDetectedBlock) -> Void)?
-    @objc var onActivateDetectionImage: ((String?, @escaping ActivateDetectionImageCompletionBlock) -> Void)?
-    @objc var onDeactivateDetectionImage: ((String, @escaping CreateDetectionImageCompletionBlock) -> Void)?
-    @objc var onDestroyDetectionImage: ((String, @escaping CreateDetectionImageCompletionBlock) -> Void)?
-    @objc var onCreateDetectionImage: (([AnyHashable : Any], @escaping CreateDetectionImageCompletionBlock) -> Void)?
-    @objc var onGetWorldMap: ((@escaping GetWorldMapCompletionBlock) -> Void)?
-    @objc var onSetWorldMap: (([AnyHashable : Any], @escaping SetWorldMapCompletionBlock) -> Void)?
-    @objc var animator: Animator?
-    @objc weak var webViewTopAnchorConstraint: NSLayoutConstraint?
-    @objc var webViewLeftAnchorConstraint: NSLayoutConstraint?
-    @objc var webViewRightAnchorConstraint: NSLayoutConstraint?
-    @objc var lastXRVisitedURL = ""
+    var onAddImageAnchor: (([AnyHashable : Any]?, @escaping ImageDetectedBlock) -> Void)?
+    var onActivateDetectionImage: ((String?, @escaping ActivateDetectionImageCompletionBlock) -> Void)?
+    var onDeactivateDetectionImage: ((String, @escaping CreateDetectionImageCompletionBlock) -> Void)?
+    var onDestroyDetectionImage: ((String, @escaping CreateDetectionImageCompletionBlock) -> Void)?
+    var onCreateDetectionImage: (([AnyHashable : Any], @escaping CreateDetectionImageCompletionBlock) -> Void)?
+    var onGetWorldMap: ((@escaping GetWorldMapCompletionBlock) -> Void)?
+    var onSetWorldMap: (([AnyHashable : Any], @escaping SetWorldMapCompletionBlock) -> Void)?
+    var animator: Animator?
+    weak var webViewTopAnchorConstraint: NSLayoutConstraint?
+    var webViewLeftAnchorConstraint: NSLayoutConstraint?
+    var webViewRightAnchorConstraint: NSLayoutConstraint?
+    var lastXRVisitedURL = ""
 
-    @objc weak var webView: WKWebView?
+    weak var webView: WKWebView?
     private weak var contentController: WKUserContentController?
     private var transferCallback = ""
-    @objc var lastURL = ""
+    var lastURL = ""
     private var documentReadyState = ""
     
-    @objc init(withWebView wv: WKWebView) {
+    init(withWebView wv: WKWebView) {
         super.init()
         
         setupWebView(withWebView: wv)
@@ -67,14 +67,14 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
         appDelegate().logger.debug("WebController dealloc")
     }
 
-    @objc func viewWillTransition(to size: CGSize) {
+    func viewWillTransition(to size: CGSize) {
         layout()
 
         // This message is not being used by the polyfyill
         // [self callWebMethod:WEB_AR_IOS_VIEW_WILL_TRANSITION_TO_SIZE_MESSAGE param:NSStringFromCGSize(size) webCompletion:debugCompletion(@"viewWillTransitionToSize")];
     }
 
-    @objc func loadURL(_ theUrl: String?) {
+    func loadURL(_ theUrl: String?) {
         goFullScreen()
 
         var url: URL?
@@ -107,12 +107,12 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
         onError?(nil)
     }
 
-    @objc func reload() {
+    func reload() {
         let url = lastURL
         loadURL(url)
     }
 
-    @objc func clean() {
+    func clean() {
         cleanWebContent()
 
         webView?.stopLoading()
@@ -121,7 +121,7 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
         URLCache.shared.removeAllCachedResponses()
     }
 
-    @objc func setup(forWebXR webXR: Bool) {
+    func setup(forWebXR webXR: Bool) {
         DispatchQueue.main.async(execute: {
             let webViewTopAnchorConstraintConstant: Float = webXR ? 0.0 : Float(Constant.urlBarHeight())
             self.webViewTopAnchorConstraint?.constant = CGFloat(webViewTopAnchorConstraintConstant)
@@ -132,27 +132,27 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
         })
     }
 
-    @objc func showDebug(_ showDebug: Bool) {
+    func showDebug(_ showDebug: Bool) {
         callWebMethod(WEB_AR_IOS_SHOW_DEBUG, paramJSON: [WEB_AR_UI_DEBUG_OPTION: showDebug ? true : false], webCompletion: debugCompletion(name: "showDebug"))
     }
 
-    @objc func wasARInterruption(_ interruption: Bool) {
+    func wasARInterruption(_ interruption: Bool) {
         let message = interruption ? WEB_AR_IOS_START_RECORDING_MESSAGE : WEB_AR_IOS_INTERRUPTION_ENDED_MESSAGE
 
         callWebMethod(message, param: "", webCompletion: debugCompletion(name: "ARinterruption"))
     }
 
-    @objc func didBackgroundAction(_ background: Bool) {
+    func didBackgroundAction(_ background: Bool) {
         let message = background ? WEB_AR_IOS_DID_MOVE_BACK_MESSAGE : WEB_AR_IOS_WILL_ENTER_FOR_MESSAGE
 
         callWebMethod(message, param: "", webCompletion: debugCompletion(name: "backgroundAction"))
     }
 
-    @objc func didChangeARTrackingState(_ state: String?) {
+    func didChangeARTrackingState(_ state: String?) {
         callWebMethod(WEB_AR_IOS_TRACKING_STATE_MESSAGE, param: state, webCompletion: debugCompletion(name: "arkitDidChangeTrackingState"))
     }
 
-    @objc func updateWindowSize() {
+    func updateWindowSize() {
         let size: CGSize? = webView?.frame.size
         let sizeDictionary = [WEB_AR_IOS_SIZE_WIDTH_PARAMETER: size?.width ?? 0, WEB_AR_IOS_SIZE_HEIGHT_PARAMETER: size?.height ?? 0]
         callWebMethod(WEB_AR_IOS_WINDOW_RESIZE_MESSAGE, paramJSON: sizeDictionary, webCompletion: debugCompletion(name: WEB_AR_IOS_WINDOW_RESIZE_MESSAGE))
@@ -162,18 +162,18 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
         callWebMethod(WEB_AR_IOS_DID_RECEIVE_MEMORY_WARNING_MESSAGE, param: "", webCompletion: debugCompletion(name: "iosDidReceiveMemoryWarning"))
     }
 
-    @objc func sendARData(_ data: [AnyHashable : Any]) {
+    func sendARData(_ data: [AnyHashable : Any]) {
         if transferCallback != ""  {
             callWebMethod(transferCallback, paramJSON: data, webCompletion: nil)
         }
     }
 
-    @objc func didReceiveError(error: NSError) {
+    func didReceiveError(error: NSError) {
         let errorDictionary = [WEB_AR_IOS_ERROR_DOMAIN_PARAMETER: error.domain, WEB_AR_IOS_ERROR_CODE_PARAMETER: error.code, WEB_AR_IOS_ERROR_MESSAGE_PARAMETER: error.localizedDescription] as [String : Any]
         callWebMethod(WEB_AR_IOS_ERROR_MESSAGE, paramJSON: errorDictionary, webCompletion: debugCompletion(name: WEB_AR_IOS_ERROR_MESSAGE))
     }
 
-    @objc func sendComputerVisionData(_ computerVisionData: [AnyHashable : Any]) {
+    func sendComputerVisionData(_ computerVisionData: [AnyHashable : Any]) {
         callWebMethod("onComputerVisionData", paramJSON: computerVisionData, webCompletion: { param, error in
             if error != nil {
                 print("Error onComputerVisionData: \(error?.localizedDescription ?? "")")
@@ -181,7 +181,7 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
         })
     }
 
-    @objc func sendNativeTime(_ nativeTime: TimeInterval) {
+    func sendNativeTime(_ nativeTime: TimeInterval) {
         print("Sending native time: \(nativeTime)")
         let jsonData = ["nativeTime": nativeTime]
         callWebMethod("setNativeTime", paramJSON: jsonData, webCompletion: { param, error in
@@ -425,7 +425,7 @@ class WebController: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessa
     func callWebMethod(_ name: String, paramJSON: Any?, webCompletion completion: WebCompletion?) {
         var jsonData: Data? = nil
         if let aJSON = paramJSON {
-            jsonData = paramJSON != nil ? try? JSONSerialization.data(withJSONObject: aJSON, options: []) : Data()
+            jsonData = try? JSONSerialization.data(withJSONObject: aJSON, options: [])
         }
         callWebMethod(name, jsonData: jsonData, webCompletion: completion)
     }

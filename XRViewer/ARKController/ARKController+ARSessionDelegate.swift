@@ -2,14 +2,10 @@ import ARKit
 
 extension ARKController: ARSessionDelegate {
     
-    // Tony: Per SO, a bug that's been around for 3+ years necessitates these @objc calls
-    // to the same functions. It's annoying the workaround doesn't resolve the warnings,
-    // but it works for now.
-    @objc(session:didUpdateFrame:)
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
         if !usingMetal {
             updateARKData(with: frame)
-            didUpdate?(self)
+            didUpdate?()
         } else {
             if let controller = controller as? ARKMetalController {
                 controller.renderer.interfaceOrientation = UIApplication.shared.statusBarOrientation
@@ -40,7 +36,6 @@ extension ARKController: ARSessionDelegate {
         }
     }
     
-    @objc(session:didAddAnchors:)
     func session(_ session: ARSession, didAdd anchors: [ARAnchor]) {
         appDelegate().logger.debug("Add Anchors - \(anchors.debugDescription)")
         
@@ -103,7 +98,6 @@ extension ARKController: ARSessionDelegate {
         }
     }
     
-    @objc(session:didUpdateAnchors:)
     func session(_ session: ARSession, didUpdate anchors: [ARAnchor]) {
         for updatedAnchor: ARAnchor in anchors {
             if updatedAnchor is ARFaceAnchor && !(configuration is ARFaceTrackingConfiguration) {
@@ -119,11 +113,15 @@ extension ARKController: ARSessionDelegate {
                 node.transform = Transform(from: updatedAnchor.transform)
                 controller.renderer(didUpdateNode: node, forAnchor: updatedAnchor)
             }
-            updateDictionary(for: updatedAnchor)
+            
+            if let anchorDictionary = objects[anchorID(for: updatedAnchor)] as? NSDictionary,
+                !addedAnchorsSinceLastFrame.contains(anchorDictionary)
+            {
+                updateDictionary(for: updatedAnchor)
+            }
         }
     }
     
-    @objc(session:didRemoveAnchors:)
     func session(_ session: ARSession, didRemove anchors: [ARAnchor]) {
         appDelegate().logger.debug("Remove Anchors - \(anchors.debugDescription)")
         for removedAnchor: ARAnchor in anchors {

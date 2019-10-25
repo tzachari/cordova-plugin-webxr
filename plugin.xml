@@ -1,4 +1,4 @@
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-webxr" version="1.17.4">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-webxr" version="1.17.5">
     <name>WebXR</name>
     <description>WebXR Plugin</description>
     <author>Thomas Zachariah</author>
